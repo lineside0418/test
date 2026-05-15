@@ -39,27 +39,28 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 40px 20px;
+        padding: 20px;
         overflow-x: hidden;
     }
 
     .dashboard {
         display: grid;
-        grid-template-columns: 340px 380px;
+        /* 少しコンパクトに画面に収まるように調整 */
+        grid-template-columns: 280px 360px;
         grid-template-rows: auto auto;
-        gap: 24px;
-        max-width: 1000px;
+        gap: 20px;
+        max-width: 900px;
     }
 
     /* Bentoカードの共通スタイル */
     .bento-card {
         background: var(--card-bg);
         border: 1px solid var(--card-border);
-        border-radius: 32px;
-        padding: 32px;
+        border-radius: 28px;
+        padding: 24px;
         backdrop-filter: blur(40px);
         -webkit-backdrop-filter: blur(40px);
-        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
         display: flex;
         flex-direction: column;
         position: relative;
@@ -67,12 +68,12 @@
     }
 
     .card-title {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
         color: var(--text-sub);
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -84,15 +85,14 @@
     .sim-card {
         grid-column: 1 / 2;
         grid-row: 1 / 3;
-        padding: 24px;
         align-items: center;
     }
 
     .canvas-container {
         position: relative;
-        width: 260px;
-        height: 500px;
-        border-radius: 20px;
+        width: 220px;
+        height: 400px; /* 縦長を抑えて画面に収まるように変更 */
+        border-radius: 18px;
         background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 100%);
         border: 2px solid rgba(255,255,255,0.1);
         box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
@@ -111,13 +111,13 @@
     .controls-card {
         grid-column: 2 / 3;
         grid-row: 1 / 2;
-        gap: 20px;
+        gap: 16px;
     }
 
     .control-group {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
     }
 
     .control-header {
@@ -127,12 +127,12 @@
     }
 
     .control-label {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 500;
     }
 
     .control-value {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
         color: var(--accent-blue);
         font-variant-numeric: tabular-nums;
@@ -143,30 +143,32 @@
         -webkit-appearance: none;
         width: 100%;
         background: transparent;
+        margin-top: 4px;
+        margin-bottom: 4px;
     }
     input[type=range]:focus {
         outline: none;
     }
     input[type=range]::-webkit-slider-runnable-track {
         width: 100%;
-        height: 8px;
+        height: 6px;
         cursor: pointer;
         background: rgba(255, 255, 255, 0.15);
-        border-radius: 8px;
+        border-radius: 6px;
         transition: background 0.2s;
     }
     input[type=range]:hover::-webkit-slider-runnable-track {
         background: rgba(255, 255, 255, 0.25);
     }
     input[type=range]::-webkit-slider-thumb {
-        height: 24px;
-        width: 24px;
+        height: 20px;
+        width: 20px;
         border-radius: 50%;
         background: #ffffff;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         cursor: pointer;
         -webkit-appearance: none;
-        margin-top: -8px;
+        margin-top: -7px;
         transition: transform 0.1s;
     }
     input[type=range]::-webkit-slider-thumb:active {
@@ -179,10 +181,10 @@
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
         color: white;
-        padding: 14px 16px;
-        font-size: 15px;
+        padding: 12px 14px;
+        font-size: 14px;
         font-weight: 500;
-        border-radius: 14px;
+        border-radius: 12px;
         outline: none;
         cursor: pointer;
         transition: all 0.2s;
@@ -208,26 +210,26 @@
         grid-row: 2 / 3;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        gap: 16px;
     }
 
     .metric-item {
         background: rgba(255, 255, 255, 0.03);
-        border-radius: 20px;
-        padding: 20px;
+        border-radius: 16px;
+        padding: 16px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
     }
 
     .metric-label {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--text-sub);
         font-weight: 500;
     }
 
     .metric-value {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 700;
         letter-spacing: -0.02em;
     }
@@ -238,17 +240,17 @@
         gap: 6px;
         padding: 6px 12px;
         border-radius: 20px;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         width: fit-content;
-        margin-top: 8px;
+        margin-top: 4px;
     }
     .status-evap { background: rgba(255, 159, 10, 0.2); color: var(--accent-orange); }
     .status-cond { background: rgba(48, 209, 88, 0.2); color: var(--accent-green); }
     .status-eq { background: rgba(10, 132, 255, 0.2); color: var(--accent-blue); }
 
     /* レスポンシブ */
-    @media (max-width: 800px) {
+    @media (max-width: 700px) {
         .dashboard {
             grid-template-columns: 1fr;
         }
@@ -273,7 +275,8 @@
             Simulation View
         </div>
         <div class="canvas-container">
-            <canvas id="simCanvas" width="520" height="1000"></canvas> <!-- Retina対応のため2倍の解像度 -->
+            <!-- CSSの半分のサイズを論理ピクセルに指定してRetinaディスプレイ対応 -->
+            <canvas id="simCanvas" width="440" height="800"></canvas>
         </div>
     </div>
 
@@ -335,11 +338,11 @@
             <span class="metric-label">現在気体圧力</span>
             <span class="metric-value" id="curPresDisp">-- hPa</span>
         </div>
-        <div class="metric-item">
+        <div class="metric-item" style="grid-column: 1 / 3;">
             <span class="metric-label">気体 / 液体 モル数</span>
-            <span class="metric-value" id="molDisp" style="font-size: 20px;">-- / -- mol</span>
+            <span class="metric-value" id="molDisp">-- / -- mol</span>
         </div>
-        <div class="metric-item">
+        <div class="metric-item" style="grid-column: 1 / 3;">
             <span class="metric-label">状態</span>
             <div id="statusBadge" class="status-badge status-eq">気液平衡</div>
         </div>
@@ -348,14 +351,13 @@
 
 <script>
 /**
- * 物理シミュレーション及び描画管理
- * アントワン式と理想気体の状態方程式を用い、微分方程式による安定した漸近モデルを採用しています。
+ * ========================================
+ * バグ修正・改良版シミュレーションロジック
+ * ========================================
+ * ・描画スケールと物理容積のスケールを完全統一（突き抜け防止）
+ * ・パーティクルのクランプ（めり込み・すり抜け防止）の厳格化
  */
 
-// ========================================
-// 物質データ（Antoine式の定数 A, B, C）
-// P = 10^(A - B/(C + T)) [mmHg]
-// ========================================
 const SUBSTANCES = {
     water: {
         name: "水",
@@ -374,22 +376,22 @@ const SUBSTANCES = {
     }
 };
 
-// ========================================
-// シミュレーション定数・状態管理
-// ========================================
-const R = 8.31446; // 気体定数 [J/(mol·K)] = [L·kPa/(mol·K)]
-const TOTAL_MOL = 50.0; // 系内の総物質量 [mol]
+const R_kPa = 8.31446; // 気体定数 [L·kPa/(mol·K)]
+const TOTAL_MOL = 50.0; // 系の総物質量 [mol]
+const LIQUID_VOL_PER_MOL = 0.04; // 1molあたりの液体の体積 [L]（シミュレーション用の仮想密度）
+const MAX_VOL = 10.0; // 容器の最大容積 [L]
+
 let currentSubstance = SUBSTANCES.water;
 
 let state = {
-    tempC: 25,             // 温度 [℃]
-    tempK: 298.15,         // 温度 [K]
-    containerVol: 5.0,     // 容器容積（ピストン位置） [L]
-    liquidMol: 25.0,       // 液体のモル数
-    gasMol: 25.0,          // 気体のモル数
-    timeSpeed: 1.0,        // 演算速度倍率
-    vaporPressurePa: 0,    // 飽和蒸気圧 [Pa]
-    currentPressurePa: 0   // 現在の圧力 [Pa]
+    tempC: 25,
+    tempK: 298.15,
+    containerVol: 5.0,
+    liquidMol: 25.0,
+    gasMol: 25.0,
+    timeSpeed: 1.0,
+    vaporPressurePa: 0,
+    currentPressurePa: 0
 };
 
 // ========================================
@@ -411,92 +413,98 @@ const UI = {
 };
 const ctx = UI.canvas.getContext('2d');
 
-// キャンバスの論理サイズ（CSSで1/2に縮小表示しRetina対応）
-const CANVAS_W = 520;
-const CANVAS_H = 1000;
+const CANVAS_W = 440;
+const CANVAS_H = 800; // この高さが10Lに相当する
 const PISTON_H = 40;
 
 // ========================================
-// パーティクルシステム（視覚表現用）
+// パーティクルシステム
 // ========================================
 class Particle {
     constructor(isGas) {
         this.isGas = isGas;
-        this.resetPosition();
-        this.radius = 4;
-        // 速度は温度に応じて動的に計算されるため、初期値は適当
+        this.radius = 6; // Retina対応のため少し大きめ
         this.vx = (Math.random() - 0.5) * 10;
         this.vy = (Math.random() - 0.5) * 10;
+        this.x = CANVAS_W / 2;
+        this.y = CANVAS_H / 2;
+        this.resetPosition();
     }
 
     resetPosition() {
-        // 液体・気体の境界高さを計算
-        const liquidRatio = state.liquidMol / TOTAL_MOL;
-        const maxLiquidHeight = CANVAS_H * 0.4; // 液体の最大高さ
-        const liquidH = maxLiquidHeight * liquidRatio;
+        // 描画スケールに合わせて配置
+        const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
+        const liquidH = CANVAS_H * (liquidVolL / MAX_VOL);
         const liquidY = CANVAS_H - liquidH;
-        const pistonY = CANVAS_H - (CANVAS_H * (state.containerVol / 10));
+        
+        const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
 
         if (this.isGas) {
-            this.x = Math.random() * CANVAS_W;
-            this.y = pistonY + PISTON_H + Math.random() * (liquidY - pistonY - PISTON_H);
+            this.x = this.radius + Math.random() * (CANVAS_W - this.radius * 2);
+            // ピストン下面と液面の間で発生
+            this.y = pistonBottom + this.radius + Math.random() * (liquidY - pistonBottom - this.radius * 2);
         } else {
-            this.x = Math.random() * CANVAS_W;
-            this.y = liquidY + Math.random() * liquidH;
+            this.x = this.radius + Math.random() * (CANVAS_W - this.radius * 2);
+            this.y = liquidY + this.radius + Math.random() * (liquidH - this.radius * 2);
         }
     }
 
-    update(dt, pistonY, liquidY) {
-        // 速度の基準（温度の平方根に比例）
+    update(dt, pistonBottom, liquidY) {
         const baseSpeed = Math.sqrt(state.tempK / 298.15) * state.timeSpeed;
         
         if (this.isGas) {
-            const speedMultiplier = 12 * baseSpeed;
+            const speedMultiplier = 16 * baseSpeed;
             this.x += this.vx * speedMultiplier * dt;
             this.y += this.vy * speedMultiplier * dt;
 
-            // 壁との弾性衝突
+            // X軸の壁反射
             if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
             else if (this.x > CANVAS_W - this.radius) { this.x = CANVAS_W - this.radius; this.vx *= -1; }
 
-            // ピストンと液面との衝突
-            if (this.y < pistonY + PISTON_H + this.radius) {
-                this.y = pistonY + PISTON_H + this.radius;
-                this.vy *= -1;
+            // Y軸（ピストン下面と液面）の反射・突き抜け防止を厳密に
+            if (this.y < pistonBottom + this.radius) {
+                this.y = pistonBottom + this.radius;
+                this.vy = Math.abs(this.vy);
             } else if (this.y > liquidY - this.radius) {
                 this.y = liquidY - this.radius;
-                this.vy *= -1;
+                this.vy = -Math.abs(this.vy);
             }
+            // クランプ（急激なスライダー操作対策）
+            this.y = Math.max(pistonBottom + this.radius, Math.min(liquidY - this.radius, this.y));
+
         } else {
-            // 液体パーティクルはゆったりとしたブラウン運動
             const speedMultiplier = 2 * baseSpeed;
-            this.vx += (Math.random() - 0.5) * 2;
-            this.vy += (Math.random() - 0.5) * 2;
-            
-            // 速度減衰
+            this.vx += (Math.random() - 0.5) * 3;
+            this.vy += (Math.random() - 0.5) * 3;
             this.vx *= 0.95;
             this.vy *= 0.95;
 
             this.x += this.vx * speedMultiplier * dt;
             this.y += this.vy * speedMultiplier * dt;
 
+            // 液体の中での反射
             if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
             else if (this.x > CANVAS_W - this.radius) { this.x = CANVAS_W - this.radius; this.vx *= -1; }
 
-            if (this.y < liquidY + this.radius) { this.y = liquidY + this.radius; this.vy = Math.abs(this.vy); }
-            else if (this.y > CANVAS_H - this.radius) { this.y = CANVAS_H - this.radius; this.vy = -Math.abs(this.vy); }
+            if (this.y < liquidY + this.radius) { 
+                this.y = liquidY + this.radius; 
+                this.vy = Math.abs(this.vy); 
+            } else if (this.y > CANVAS_H - this.radius) { 
+                this.y = CANVAS_H - this.radius; 
+                this.vy = -Math.abs(this.vy); 
+            }
+            this.y = Math.max(liquidY + this.radius, Math.min(CANVAS_H - this.radius, this.y));
         }
     }
 
     draw(ctx, color) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.isGas ? color.replace("0.9", "0.6") : color;
+        ctx.fillStyle = this.isGas ? color.replace("0.9", "0.7") : color;
         ctx.fill();
         
-        // グロー効果（気体の場合）
         if (this.isGas) {
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 12;
             ctx.shadowColor = color;
             ctx.fill();
             ctx.shadowBlur = 0;
@@ -504,8 +512,7 @@ class Particle {
     }
 }
 
-// 描画用パーティクル配列（1モル = 5個として計算）
-const PARTICLE_RATIO = 5;
+const PARTICLE_RATIO = 4; // 1molあたりの粒子数
 let particles = [];
 
 function syncParticles() {
@@ -515,7 +522,6 @@ function syncParticles() {
     let currentGas = particles.filter(p => p.isGas).length;
     let currentLiquid = particles.filter(p => !p.isGas).length;
 
-    // 状態変化によるパーティクルの相転移（描画上の変換）
     while (currentGas < targetGas && currentLiquid > 0) {
         const p = particles.find(p => !p.isGas);
         if (p) { p.isGas = true; p.resetPosition(); currentGas++; currentLiquid--; }
@@ -526,66 +532,65 @@ function syncParticles() {
     }
 }
 
-// 初期パーティクル生成
 for (let i = 0; i < TOTAL_MOL * PARTICLE_RATIO; i++) {
     particles.push(new Particle(i < state.gasMol * PARTICLE_RATIO));
 }
 
+// ========================================
+// ボリューム（ピストン位置）のクランプ
+// ピストンが絶対に液面を押し潰さないようにする
+// ========================================
+function clampVolume() {
+    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
+    const minVol = liquidVolL + 0.3; // 少なくとも0.3Lは気相のスペースを残す
+    
+    // スライダーの設定にも反映
+    UI.vol.min = minVol.toFixed(2);
+
+    if (state.containerVol < minVol) {
+        state.containerVol = minVol;
+        UI.vol.value = minVol;
+        UI.volDisp.textContent = `${state.containerVol.toFixed(1)} L`;
+    }
+}
 
 // ========================================
-// 物理演算ロジック
+// 物理演算
 // ========================================
 function calculatePhysics(dt) {
-    // 1. Antoine式による飽和蒸気圧の計算 [mmHg] -> [Pa]
-    // Tは摂氏。式の制約上、適切な範囲で計算。
     const pVapMmHg = Math.pow(10, currentSubstance.A - (currentSubstance.B / (currentSubstance.C + state.tempC)));
     state.vaporPressurePa = pVapMmHg * 133.322;
 
-    // 2. 液体体積の概算（1mol = 0.018L と仮定して気体容積を計算）
-    const liquidVolL = state.liquidMol * 0.018; 
+    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL; 
     let gasVolL = state.containerVol - liquidVolL;
-    if (gasVolL < 0.1) gasVolL = 0.1; // 最小容積の保証
+    if (gasVolL < 0.1) gasVolL = 0.1;
 
-    // 3. 理想気体の状態方程式より、目標となる気体のモル数（平衡状態）を算出
-    // P*V = n*R*T  =>  n_eq = P_vap * V / (R * T)
-    // Rは[L·kPa/(mol·K)]なので PaをkPaに変換
-    const R_kPa = 8.31446;
     let targetGasMol = (state.vaporPressurePa / 1000) * gasVolL / (R_kPa * state.tempK);
-
-    // 物理的限界（全物質量）でクランプ
     if (targetGasMol > TOTAL_MOL) targetGasMol = TOTAL_MOL;
 
-    // 4. 微分方程式によるモル数の漸近更新
-    // dn/dt = k * (n_eq - n) 
-    // 反応速度定数 k は温度依存（アレニウスの式を簡略化）
     const reactionRate = 2.0 * Math.exp(-1500 / state.tempK) * state.timeSpeed;
-    
     const diffMol = targetGasMol - state.gasMol;
     
-    // 更新
-    const deltaMol = diffMol * reactionRate * (dt * 60); // dt基準調整
+    const deltaMol = diffMol * reactionRate * (dt * 60);
     state.gasMol += deltaMol;
     state.liquidMol = TOTAL_MOL - state.gasMol;
 
-    // 誤差補正
     if (state.gasMol < 0) { state.gasMol = 0; state.liquidMol = TOTAL_MOL; }
     if (state.liquidMol < 0) { state.liquidMol = 0; state.gasMol = TOTAL_MOL; }
 
-    // 5. 現在の圧力計算 [Pa]
     state.currentPressurePa = (state.gasMol * R_kPa * state.tempK / gasVolL) * 1000;
 }
 
 // ========================================
-// UI・描画更新ロジック
+// UI・描画
 // ========================================
 function updateUI() {
     UI.vapPresDisp.textContent = `${(state.vaporPressurePa / 100).toFixed(1)} hPa`;
     UI.curPresDisp.textContent = `${(state.currentPressurePa / 100).toFixed(1)} hPa`;
     UI.molDisp.textContent = `${state.gasMol.toFixed(1)} / ${state.liquidMol.toFixed(1)} mol`;
 
-    // 状態判定とバッジの更新
     const diff = state.vaporPressurePa - state.currentPressurePa;
-    const threshold = state.vaporPressurePa * 0.01; // 1%の閾値
+    const threshold = state.vaporPressurePa * 0.01;
 
     if (state.liquidMol < 0.1) {
         UI.statusBadge.textContent = "気体のみ";
@@ -603,49 +608,47 @@ function updateUI() {
 }
 
 function drawCanvas() {
-    // 画面クリア
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-    // 座標計算
-    const liquidRatio = state.liquidMol / TOTAL_MOL;
-    const maxLiquidHeight = CANVAS_H * 0.4;
-    const liquidH = maxLiquidHeight * liquidRatio;
+    // 液面とピストンの高さをスケール(MAX_VOL = CANVAS_H)に完全一致させる
+    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
+    const liquidH = CANVAS_H * (liquidVolL / MAX_VOL);
     const liquidY = CANVAS_H - liquidH;
     
-    // ピストンの位置 (体積 2L〜10L を高さにマッピング)
-    const pistonY = CANVAS_H - (CANVAS_H * (state.containerVol / 10));
+    // ピストン下面のY座標
+    const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
 
-    // 気体領域の描画（背景）
+    // 気体領域
     ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
-    ctx.fillRect(0, pistonY + PISTON_H, CANVAS_W, liquidY - (pistonY + PISTON_H));
+    ctx.fillRect(0, pistonBottom, CANVAS_W, liquidY - pistonBottom);
 
-    // 液体領域の描画（グラデーション）
+    // 液体領域
     const grad = ctx.createLinearGradient(0, liquidY, 0, CANVAS_H);
     grad.addColorStop(0, currentSubstance.colorL);
     grad.addColorStop(1, currentSubstance.colorD);
     ctx.fillStyle = grad;
     ctx.fillRect(0, liquidY, CANVAS_W, liquidH);
     
-    // 液面のハイライト
     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
     ctx.fillRect(0, liquidY, CANVAS_W, 2);
 
-    // パーティクルの描画
+    // パーティクル
     particles.forEach(p => p.draw(ctx, currentSubstance.colorL));
 
-    // ピストンの描画 (モダンな金属風)
-    const pistonGrad = ctx.createLinearGradient(0, pistonY, 0, pistonY + PISTON_H);
+    // ピストン描画（下から上にPISTON_H分描く）
+    const pistonTop = pistonBottom - PISTON_H;
+    const pistonGrad = ctx.createLinearGradient(0, pistonTop, 0, pistonBottom);
     pistonGrad.addColorStop(0, "#E5E5EA");
     pistonGrad.addColorStop(1, "#8E8E93");
     
     ctx.fillStyle = pistonGrad;
     ctx.beginPath();
-    ctx.roundRect(4, pistonY, CANVAS_W - 8, PISTON_H, 12);
+    ctx.roundRect(4, pistonTop, CANVAS_W - 8, PISTON_H, 12);
     ctx.fill();
 
-    // ピストンシャフト
+    // シャフト
     ctx.fillStyle = "#D1D1D6";
-    ctx.fillRect(CANVAS_W/2 - 12, 0, 24, pistonY);
+    ctx.fillRect(CANVAS_W/2 - 12, 0, 24, pistonTop);
 }
 
 // ========================================
@@ -654,21 +657,22 @@ function drawCanvas() {
 let lastTime = performance.now();
 
 function loop(currentTime) {
-    const dt = Math.min((currentTime - lastTime) / 1000, 0.05); // 最大dt制限でジャンプ防止
+    const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
     lastTime = currentTime;
 
-    // 状態同期と演算
+    // スライダー位置の制限を常に監視
+    clampVolume();
+
     syncParticles();
     calculatePhysics(dt);
     
-    // パーティクル位置更新
-    const maxLiquidHeight = CANVAS_H * 0.4;
-    const liquidY = CANVAS_H - (maxLiquidHeight * (state.liquidMol / TOTAL_MOL));
-    const pistonY = CANVAS_H - (CANVAS_H * (state.containerVol / 10));
+    // パーティクル用に最新の座標を計算
+    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
+    const liquidY = CANVAS_H - (CANVAS_H * (liquidVolL / MAX_VOL));
+    const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
     
-    particles.forEach(p => p.update(dt, pistonY, liquidY));
+    particles.forEach(p => p.update(dt, pistonBottom, liquidY));
 
-    // 描画とUI更新
     drawCanvas();
     updateUI();
 
@@ -676,7 +680,7 @@ function loop(currentTime) {
 }
 
 // ========================================
-// イベントリスナー設定
+// イベントリスナー
 // ========================================
 UI.substance.addEventListener('change', (e) => {
     currentSubstance = SUBSTANCES[e.target.value];
@@ -698,7 +702,6 @@ UI.speed.addEventListener('input', (e) => {
     UI.speedDisp.textContent = `${state.timeSpeed.toFixed(1)}x`;
 });
 
-// 初期化とループ開始
 requestAnimationFrame(loop);
 
 </script>
