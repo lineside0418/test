@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vapor-Liquid Equilibrium Simulator - Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<title>Vapor-Liquid Equilibrium Simulator - Visual Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     /* ========================================
        ベーススタイル・デザイン変数
-       Appleライク・モダンBento UI
+       サイバー・モダンBento UI
        ======================================== */
     :root {
-        --bg-color: #000000;
-        --card-bg: rgba(28, 28, 30, 0.6);
-        --card-border: rgba(255, 255, 255, 0.1);
-        --accent-blue: #0A84FF;
-        --accent-green: #30D158;
-        --accent-orange: #FF9F0A;
-        --text-main: #F5F5F7;
-        --text-sub: #86868B;
+        --bg-color: #050505;
+        --card-bg: rgba(20, 20, 25, 0.7);
+        --card-border: rgba(255, 255, 255, 0.15);
+        --accent-blue: #00f0ff;
+        --accent-green: #39ff14;
+        --accent-orange: #ff3c00;
+        --text-main: #ffffff;
+        --text-sub: #a0a0b0;
         --font-family: 'Inter', 'Noto Sans JP', sans-serif;
     }
 
@@ -31,8 +31,8 @@
     body {
         background-color: var(--bg-color);
         background-image: 
-            radial-gradient(circle at 15% 50%, rgba(10, 132, 255, 0.15), transparent 25%),
-            radial-gradient(circle at 85% 30%, rgba(48, 209, 88, 0.15), transparent 25%);
+            radial-gradient(circle at 20% 40%, rgba(0, 240, 255, 0.15), transparent 40%),
+            radial-gradient(circle at 80% 60%, rgba(57, 255, 20, 0.1), transparent 40%);
         color: var(--text-main);
         font-family: var(--font-family);
         min-height: 100vh;
@@ -45,22 +45,20 @@
 
     .dashboard {
         display: grid;
-        /* 少しコンパクトに画面に収まるように調整 */
         grid-template-columns: 280px 360px;
         grid-template-rows: auto auto;
         gap: 20px;
         max-width: 900px;
     }
 
-    /* Bentoカードの共通スタイル */
     .bento-card {
         background: var(--card-bg);
         border: 1px solid var(--card-border);
         border-radius: 28px;
         padding: 24px;
-        backdrop-filter: blur(40px);
-        -webkit-backdrop-filter: blur(40px);
-        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
         display: flex;
         flex-direction: column;
         position: relative;
@@ -69,14 +67,15 @@
 
     .card-title {
         font-size: 13px;
-        font-weight: 600;
-        color: var(--text-sub);
-        letter-spacing: 0.05em;
+        font-weight: 800;
+        color: var(--accent-blue);
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 8px;
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
     /* ========================================
@@ -91,11 +90,11 @@
     .canvas-container {
         position: relative;
         width: 220px;
-        height: 400px; /* 縦長を抑えて画面に収まるように変更 */
+        height: 400px;
         border-radius: 18px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 100%);
-        border: 2px solid rgba(255,255,255,0.1);
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        background: #020202;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), inset 0 0 40px rgba(0,0,0,1);
         overflow: hidden;
     }
 
@@ -103,6 +102,8 @@
         display: block;
         width: 100%;
         height: 100%;
+        /* 見た目をさらに鮮やかにするフィルター */
+        filter: contrast(1.1) saturate(1.5);
     }
 
     /* ========================================
@@ -128,17 +129,17 @@
 
     .control-label {
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
     }
 
     .control-value {
-        font-size: 15px;
-        font-weight: 700;
+        font-size: 16px;
+        font-weight: 800;
         color: var(--accent-blue);
         font-variant-numeric: tabular-nums;
+        text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
     }
 
-    /* カスタムスライダー */
     input[type=range] {
         -webkit-appearance: none;
         width: 100%;
@@ -146,64 +147,59 @@
         margin-top: 4px;
         margin-bottom: 4px;
     }
-    input[type=range]:focus {
-        outline: none;
-    }
+    input[type=range]:focus { outline: none; }
     input[type=range]::-webkit-slider-runnable-track {
         width: 100%;
-        height: 6px;
+        height: 8px;
         cursor: pointer;
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 6px;
-        transition: background 0.2s;
-    }
-    input[type=range]:hover::-webkit-slider-runnable-track {
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
     }
     input[type=range]::-webkit-slider-thumb {
         height: 20px;
         width: 20px;
         border-radius: 50%;
-        background: #ffffff;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        background: var(--accent-blue);
+        box-shadow: 0 0 15px var(--accent-blue);
         cursor: pointer;
         -webkit-appearance: none;
-        margin-top: -7px;
-        transition: transform 0.1s;
+        margin-top: -6px;
+        transition: transform 0.1s, background 0.2s;
     }
     input[type=range]::-webkit-slider-thumb:active {
-        transform: scale(1.1);
+        transform: scale(1.2);
+        background: #ffffff;
     }
 
-    /* カスタムセレクトボックス */
     select {
         appearance: none;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(0, 240, 255, 0.3);
         color: white;
         padding: 12px 14px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         border-radius: 12px;
         outline: none;
         cursor: pointer;
         transition: all 0.2s;
-        font-family: inherit;
     }
     select:hover {
-        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
     }
     select:focus {
         border-color: var(--accent-blue);
-        box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.2);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
     }
     select option {
-        background: #1c1c1e;
+        background: #111;
         color: white;
     }
 
     /* ========================================
-       メトリクス（統計・情報）パネル
+       メトリクスパネル
        ======================================== */
     .metrics-card {
         grid-column: 2 / 3;
@@ -214,7 +210,8 @@
     }
 
     .metric-item {
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 16px;
         padding: 16px;
         display: flex;
@@ -225,66 +222,57 @@
     .metric-label {
         font-size: 12px;
         color: var(--text-sub);
-        font-weight: 500;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
 
     .metric-value {
         font-size: 20px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
+        font-weight: 800;
+        letter-spacing: 0;
     }
 
     .status-badge {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
-        padding: 6px 12px;
+        padding: 8px 16px;
         border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        width: fit-content;
+        font-size: 13px;
+        font-weight: 800;
+        width: 100%;
         margin-top: 4px;
+        text-shadow: 0 0 5px rgba(0,0,0,0.5);
     }
-    .status-evap { background: rgba(255, 159, 10, 0.2); color: var(--accent-orange); }
-    .status-cond { background: rgba(48, 209, 88, 0.2); color: var(--accent-green); }
-    .status-eq { background: rgba(10, 132, 255, 0.2); color: var(--accent-blue); }
+    .status-evap { background: rgba(255, 60, 0, 0.8); color: #fff; box-shadow: 0 0 15px rgba(255, 60, 0, 0.5); }
+    .status-cond { background: rgba(57, 255, 20, 0.8); color: #000; box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
+    .status-eq { background: rgba(0, 240, 255, 0.8); color: #000; box-shadow: 0 0 15px rgba(0, 240, 255, 0.5); }
 
-    /* レスポンシブ */
     @media (max-width: 700px) {
-        .dashboard {
-            grid-template-columns: 1fr;
-        }
-        .sim-card {
-            grid-column: 1 / 2;
-            grid-row: auto;
-        }
-        .controls-card, .metrics-card {
-            grid-column: 1 / 2;
-            grid-row: auto;
-        }
+        .dashboard { grid-template-columns: 1fr; }
+        .sim-card, .controls-card, .metrics-card { grid-column: 1 / 2; grid-row: auto; }
     }
 </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <!-- シミュレーション画面 -->
     <div class="bento-card sim-card">
         <div class="card-title">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
-            Simulation View
+            Particle Vision
         </div>
         <div class="canvas-container">
-            <!-- CSSの半分のサイズを論理ピクセルに指定してRetinaディスプレイ対応 -->
             <canvas id="simCanvas" width="440" height="800"></canvas>
         </div>
     </div>
 
-    <!-- コントロールパネル -->
     <div class="bento-card controls-card">
         <div class="card-title">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Parameters
+            System Override
         </div>
 
         <div class="control-group">
@@ -323,11 +311,10 @@
         </div>
     </div>
 
-    <!-- メトリクスパネル -->
     <div class="bento-card metrics-card">
         <div class="card-title" style="grid-column: 1 / 3;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-            Real-time Metrics
+            Live Telemetry
         </div>
         
         <div class="metric-item">
@@ -343,7 +330,6 @@
             <span class="metric-value" id="molDisp">-- / -- mol</span>
         </div>
         <div class="metric-item" style="grid-column: 1 / 3;">
-            <span class="metric-label">状態</span>
             <div id="statusBadge" class="status-badge status-eq">気液平衡</div>
         </div>
     </div>
@@ -352,34 +338,30 @@
 <script>
 /**
  * ========================================
- * バグ修正・改良版シミュレーションロジック
+ * バチバチ派手なパーティクルエフェクト特化版
  * ========================================
- * ・描画スケールと物理容積のスケールを完全統一（突き抜け防止）
- * ・パーティクルのクランプ（めり込み・すり抜け防止）の厳格化
  */
 
+// 色をネオンカラーに調整して発光感をマシマシに
 const SUBSTANCES = {
     water: {
-        name: "水",
-        A: 8.07131, B: 1730.63, C: 233.426,
-        colorL: "rgba(10, 132, 255, 0.7)", colorD: "rgba(10, 132, 255, 0.9)"
+        name: "水", A: 8.07131, B: 1730.63, C: 233.426,
+        colorL: "rgba(0, 240, 255, 0.8)", colorD: "rgba(0, 100, 255, 0.9)"
     },
     ethanol: {
-        name: "エタノール",
-        A: 8.20417, B: 1642.89, C: 230.300,
-        colorL: "rgba(255, 159, 10, 0.7)", colorD: "rgba(255, 159, 10, 0.9)"
+        name: "エタノール", A: 8.20417, B: 1642.89, C: 230.300,
+        colorL: "rgba(255, 100, 0, 0.8)", colorD: "rgba(255, 40, 0, 0.9)"
     },
     diethylether: {
-        name: "ジエチルエーテル",
-        A: 6.98685, B: 1064.63, C: 228.000,
-        colorL: "rgba(48, 209, 88, 0.7)", colorD: "rgba(48, 209, 88, 0.9)"
+        name: "ジエチルエーテル", A: 6.98685, B: 1064.63, C: 228.000,
+        colorL: "rgba(57, 255, 20, 0.8)", colorD: "rgba(0, 150, 0, 0.9)"
     }
 };
 
-const R_kPa = 8.31446; // 気体定数 [L·kPa/(mol·K)]
-const TOTAL_MOL = 50.0; // 系の総物質量 [mol]
-const LIQUID_VOL_PER_MOL = 0.04; // 1molあたりの液体の体積 [L]（シミュレーション用の仮想密度）
-const MAX_VOL = 10.0; // 容器の最大容積 [L]
+const R_kPa = 8.31446; 
+const TOTAL_MOL = 50.0; 
+const LIQUID_VOL_PER_MOL = 0.04; 
+const MAX_VOL = 10.0; 
 
 let currentSubstance = SUBSTANCES.water;
 
@@ -394,9 +376,6 @@ let state = {
     currentPressurePa: 0
 };
 
-// ========================================
-// DOM要素の取得
-// ========================================
 const UI = {
     substance: document.getElementById('substanceSelect'),
     temp: document.getElementById('tempSlider'),
@@ -414,35 +393,39 @@ const UI = {
 const ctx = UI.canvas.getContext('2d');
 
 const CANVAS_W = 440;
-const CANVAS_H = 800; // この高さが10Lに相当する
+const CANVAS_H = 800; 
 const PISTON_H = 40;
 
-// ========================================
-// パーティクルシステム
-// ========================================
+// 【見栄え特化】パーティクルの量をめちゃくちゃ増やす！
+const PARTICLE_RATIO = 12; // 1molあたり12個。合計600個のパーティクルが飛び交う
+let particles = [];
+
 class Particle {
     constructor(isGas) {
         this.isGas = isGas;
-        this.radius = 6; // Retina対応のため少し大きめ
-        this.vx = (Math.random() - 0.5) * 10;
-        this.vy = (Math.random() - 0.5) * 10;
+        // 気体は少し小さく、液体は少し大きくしてメリハリを
+        this.radius = isGas ? 3 : 5; 
+        this.vx = (Math.random() - 0.5) * 20;
+        this.vy = (Math.random() - 0.5) * 20;
         this.x = CANVAS_W / 2;
         this.y = CANVAS_H / 2;
         this.resetPosition();
     }
 
     resetPosition() {
-        // 描画スケールに合わせて配置
         const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
         const liquidH = CANVAS_H * (liquidVolL / MAX_VOL);
         const liquidY = CANVAS_H - liquidH;
-        
         const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
+
+        this.radius = this.isGas ? Math.random() * 2 + 2 : Math.random() * 2 + 4;
 
         if (this.isGas) {
             this.x = this.radius + Math.random() * (CANVAS_W - this.radius * 2);
-            // ピストン下面と液面の間で発生
             this.y = pistonBottom + this.radius + Math.random() * (liquidY - pistonBottom - this.radius * 2);
+            // 湧き出た瞬間に激しく動くように
+            this.vx = (Math.random() - 0.5) * 50;
+            this.vy = (Math.random() - 0.5) * 50;
         } else {
             this.x = this.radius + Math.random() * (CANVAS_W - this.radius * 2);
             this.y = liquidY + this.radius + Math.random() * (liquidH - this.radius * 2);
@@ -453,7 +436,8 @@ class Particle {
         const baseSpeed = Math.sqrt(state.tempK / 298.15) * state.timeSpeed;
         
         if (this.isGas) {
-            const speedMultiplier = 16 * baseSpeed;
+            // 【見栄え特化】気体パーティクルの速度を爆上げして画面中を飛び回らせる
+            const speedMultiplier = 60 * baseSpeed; 
             this.x += this.vx * speedMultiplier * dt;
             this.y += this.vy * speedMultiplier * dt;
 
@@ -461,28 +445,27 @@ class Particle {
             if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
             else if (this.x > CANVAS_W - this.radius) { this.x = CANVAS_W - this.radius; this.vx *= -1; }
 
-            // Y軸（ピストン下面と液面）の反射・突き抜け防止を厳密に
+            // Y軸の反射
             if (this.y < pistonBottom + this.radius) {
                 this.y = pistonBottom + this.radius;
-                this.vy = Math.abs(this.vy);
+                this.vy *= -1;
             } else if (this.y > liquidY - this.radius) {
                 this.y = liquidY - this.radius;
-                this.vy = -Math.abs(this.vy);
+                this.vy *= -1;
             }
-            // クランプ（急激なスライダー操作対策）
             this.y = Math.max(pistonBottom + this.radius, Math.min(liquidY - this.radius, this.y));
 
         } else {
-            const speedMultiplier = 2 * baseSpeed;
-            this.vx += (Math.random() - 0.5) * 3;
-            this.vy += (Math.random() - 0.5) * 3;
-            this.vx *= 0.95;
-            this.vy *= 0.95;
+            // 液体の中は少しゆったりだけど動きは残す
+            const speedMultiplier = 5 * baseSpeed;
+            this.vx += (Math.random() - 0.5) * 5;
+            this.vy += (Math.random() - 0.5) * 5;
+            this.vx *= 0.92;
+            this.vy *= 0.92;
 
             this.x += this.vx * speedMultiplier * dt;
             this.y += this.vy * speedMultiplier * dt;
 
-            // 液体の中での反射
             if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
             else if (this.x > CANVAS_W - this.radius) { this.x = CANVAS_W - this.radius; this.vx *= -1; }
 
@@ -500,24 +483,30 @@ class Particle {
     draw(ctx, color) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.isGas ? color.replace("0.9", "0.7") : color;
-        ctx.fill();
         
         if (this.isGas) {
-            ctx.shadowBlur = 12;
+            // 気体は白っぽく光らせる
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = color.replace("0.8", "1");
+        } else {
+            // 液体は少し透け感を出して密集した時の美しさを重視
+            ctx.fillStyle = color.replace("0.8", "0.6");
+            ctx.shadowBlur = 5;
             ctx.shadowColor = color;
-            ctx.fill();
-            ctx.shadowBlur = 0;
         }
+        ctx.fill();
+        ctx.shadowBlur = 0; // リセット
     }
 }
 
-const PARTICLE_RATIO = 4; // 1molあたりの粒子数
-let particles = [];
-
 function syncParticles() {
-    const targetGas = Math.floor(state.gasMol * PARTICLE_RATIO);
-    const targetLiquid = Math.floor(state.liquidMol * PARTICLE_RATIO);
+    // 【見栄え特化】見かけ上、気体の最低数を底上げして、どんな状況でも少しは飛んでいるようにする
+    let visualGasMol = state.gasMol + (state.liquidMol > 0 ? 5 : 0); 
+    if(visualGasMol > TOTAL_MOL) visualGasMol = TOTAL_MOL;
+
+    const targetGas = Math.floor(visualGasMol * PARTICLE_RATIO);
+    const targetLiquid = Math.floor((TOTAL_MOL - visualGasMol) * PARTICLE_RATIO);
     
     let currentGas = particles.filter(p => p.isGas).length;
     let currentLiquid = particles.filter(p => !p.isGas).length;
@@ -536,15 +525,10 @@ for (let i = 0; i < TOTAL_MOL * PARTICLE_RATIO; i++) {
     particles.push(new Particle(i < state.gasMol * PARTICLE_RATIO));
 }
 
-// ========================================
-// ボリューム（ピストン位置）のクランプ
-// ピストンが絶対に液面を押し潰さないようにする
-// ========================================
 function clampVolume() {
     const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
-    const minVol = liquidVolL + 0.3; // 少なくとも0.3Lは気相のスペースを残す
+    const minVol = liquidVolL + 0.5; // 気相のスペースを少し広めに確保
     
-    // スライダーの設定にも反映
     UI.vol.min = minVol.toFixed(2);
 
     if (state.containerVol < minVol) {
@@ -554,9 +538,6 @@ function clampVolume() {
     }
 }
 
-// ========================================
-// 物理演算
-// ========================================
 function calculatePhysics(dt) {
     const pVapMmHg = Math.pow(10, currentSubstance.A - (currentSubstance.B / (currentSubstance.C + state.tempC)));
     state.vaporPressurePa = pVapMmHg * 133.322;
@@ -581,92 +562,88 @@ function calculatePhysics(dt) {
     state.currentPressurePa = (state.gasMol * R_kPa * state.tempK / gasVolL) * 1000;
 }
 
-// ========================================
-// UI・描画
-// ========================================
 function updateUI() {
     UI.vapPresDisp.textContent = `${(state.vaporPressurePa / 100).toFixed(1)} hPa`;
     UI.curPresDisp.textContent = `${(state.currentPressurePa / 100).toFixed(1)} hPa`;
     UI.molDisp.textContent = `${state.gasMol.toFixed(1)} / ${state.liquidMol.toFixed(1)} mol`;
 
     const diff = state.vaporPressurePa - state.currentPressurePa;
-    const threshold = state.vaporPressurePa * 0.01;
+    const threshold = state.vaporPressurePa * 0.02;
 
     if (state.liquidMol < 0.1) {
-        UI.statusBadge.textContent = "気体のみ";
+        UI.statusBadge.textContent = "GAS ONLY";
         UI.statusBadge.className = "status-badge status-eq";
     } else if (Math.abs(diff) < threshold) {
-        UI.statusBadge.textContent = "気液平衡";
+        UI.statusBadge.textContent = "EQUILIBRIUM";
         UI.statusBadge.className = "status-badge status-eq";
     } else if (diff > 0) {
-        UI.statusBadge.textContent = "蒸発進行中 ↑";
+        UI.statusBadge.textContent = "EVAPORATING ↑";
         UI.statusBadge.className = "status-badge status-evap";
     } else {
-        UI.statusBadge.textContent = "凝縮進行中 ↓";
+        UI.statusBadge.textContent = "CONDENSING ↓";
         UI.statusBadge.className = "status-badge status-cond";
     }
 }
 
 function drawCanvas() {
+    ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-    // 液面とピストンの高さをスケール(MAX_VOL = CANVAS_H)に完全一致させる
     const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
     const liquidH = CANVAS_H * (liquidVolL / MAX_VOL);
     const liquidY = CANVAS_H - liquidH;
     
-    // ピストン下面のY座標
     const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
 
-    // 気体領域
-    ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
+    // 気体領域の背景
+    ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
     ctx.fillRect(0, pistonBottom, CANVAS_W, liquidY - pistonBottom);
 
     // 液体領域
     const grad = ctx.createLinearGradient(0, liquidY, 0, CANVAS_H);
-    grad.addColorStop(0, currentSubstance.colorL);
-    grad.addColorStop(1, currentSubstance.colorD);
+    grad.addColorStop(0, currentSubstance.colorL.replace("0.8", "0.4"));
+    grad.addColorStop(1, currentSubstance.colorD.replace("0.9", "0.7"));
     ctx.fillStyle = grad;
     ctx.fillRect(0, liquidY, CANVAS_W, liquidH);
     
-    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    // 液面のハイライト（光らせる）
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = currentSubstance.colorL;
     ctx.fillRect(0, liquidY, CANVAS_W, 2);
+    ctx.shadowBlur = 0;
 
-    // パーティクル
+    // 【見栄え特化】パーティクルを加算合成モードで描画して光の重なりを表現
+    ctx.globalCompositeOperation = 'lighter';
     particles.forEach(p => p.draw(ctx, currentSubstance.colorL));
 
-    // ピストン描画（下から上にPISTON_H分描く）
+    // ピストン（加算合成の前に戻す）
+    ctx.globalCompositeOperation = 'source-over';
     const pistonTop = pistonBottom - PISTON_H;
     const pistonGrad = ctx.createLinearGradient(0, pistonTop, 0, pistonBottom);
-    pistonGrad.addColorStop(0, "#E5E5EA");
-    pistonGrad.addColorStop(1, "#8E8E93");
+    pistonGrad.addColorStop(0, "#2a2a30");
+    pistonGrad.addColorStop(1, "#151518");
     
     ctx.fillStyle = pistonGrad;
     ctx.beginPath();
-    ctx.roundRect(4, pistonTop, CANVAS_W - 8, PISTON_H, 12);
+    ctx.roundRect(4, pistonTop, CANVAS_W - 8, PISTON_H, 8);
     ctx.fill();
 
     // シャフト
-    ctx.fillStyle = "#D1D1D6";
-    ctx.fillRect(CANVAS_W/2 - 12, 0, 24, pistonTop);
+    ctx.fillStyle = "#333";
+    ctx.fillRect(CANVAS_W/2 - 8, 0, 16, pistonTop);
 }
 
-// ========================================
-// メインループ
-// ========================================
 let lastTime = performance.now();
 
 function loop(currentTime) {
     const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
     lastTime = currentTime;
 
-    // スライダー位置の制限を常に監視
     clampVolume();
-
     syncParticles();
     calculatePhysics(dt);
     
-    // パーティクル用に最新の座標を計算
     const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
     const liquidY = CANVAS_H - (CANVAS_H * (liquidVolL / MAX_VOL));
     const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
@@ -679,9 +656,6 @@ function loop(currentTime) {
     requestAnimationFrame(loop);
 }
 
-// ========================================
-// イベントリスナー
-// ========================================
 UI.substance.addEventListener('change', (e) => {
     currentSubstance = SUBSTANCES[e.target.value];
 });
