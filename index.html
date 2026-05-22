@@ -3,31 +3,34 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>6鍵 音ゲー譜面エディタ — 改良完全版</title>
+<title>6鍵 音ゲー譜面エディタ — 上部メニュー版</title>
 <style>
   :root{
     --bg:#0f1720; --panel:#0b1220; --accent:#06b6d4; --muted:#94a3b8;
     --note:#f97316; --hold:#f59e0b; --grid:#1f2937; --playhead:#ef4444;
-    --lane-width:80px; --lane-gap:0; --lane-count:6;
-    --snap-px:20px; /* 1 subdiv 単位のピクセル幅 */
-    --height:420px;
+    --lane-width:80px; --lane-count:6;
+    --snap-px:20px; --height:420px;
+    --toolbar-height:140px;
   }
   html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:#e6eef6}
-  .app{display:flex;gap:12px;padding:12px;box-sizing:border-box;height:100%}
-  .sidebar{width:360px;background:linear-gradient(180deg,var(--panel),#071022);border-radius:8px;padding:12px;box-sizing:border-box;overflow:auto}
-  .main{flex:1;display:flex;flex-direction:column;gap:12px}
-  h1{font-size:16px;margin:0 0 8px 0;color:#dff6fb}
-  label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
-  .row{display:flex;gap:8px;align-items:center;margin-top:8px}
-  input[type=number],select,input[type=text]{width:100%;padding:6px;border-radius:6px;border:1px solid #123;background:#071022;color:#e6eef6}
+  .app{display:flex;flex-direction:column;height:100%}
+  /* Top toolbar */
+  .toolbar{display:flex;gap:12px;padding:12px;background:linear-gradient(180deg,var(--panel),#071022);box-shadow:0 6px 18px rgba(2,6,23,.6);align-items:flex-start;flex-wrap:wrap}
+  .panel{background:transparent;display:flex;flex-direction:column;gap:8px}
+  .panel .row{display:flex;gap:8px;align-items:center}
+  label{font-size:13px;color:var(--muted)}
+  input[type=number],select,input[type=text]{padding:6px;border-radius:6px;border:1px solid #123;background:#071022;color:#e6eef6}
   button{background:var(--accent);border:none;color:#042027;padding:8px 10px;border-radius:6px;cursor:pointer;font-weight:600}
   button.secondary{background:#1f2937;color:#cfeff6}
-  .controls{display:flex;gap:8px;align-items:center}
-  .canvas-wrap{background:linear-gradient(180deg,#071022,#04101a);padding:10px;border-radius:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
-  .timeline{position:relative;height:var(--height);overflow:auto;border-radius:6px;background:linear-gradient(180deg,#071022,#04101a);border:1px solid rgba(255,255,255,.03)}
-  .lane-headers{display:flex;gap:0;background:transparent;position:sticky;top:0;z-index:40}
+  .seg{background:#071022;border:1px solid rgba(255,255,255,.03);padding:6px;border-radius:6px;color:var(--muted)}
+  .small{font-size:12px;color:var(--muted)}
+  /* Main area */
+  .main{flex:1;display:flex;flex-direction:column;padding:12px;gap:12px;box-sizing:border-box;overflow:hidden}
+  .canvas-wrap{background:linear-gradient(180deg,#071022,#04101a);padding:10px;border-radius:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.02);height:100%;display:flex;flex-direction:column}
+  .timeline-wrap{flex:1;overflow:auto;border-radius:6px;border:1px solid rgba(255,255,255,.03);position:relative;background:linear-gradient(180deg,#071022,#04101a)}
+  .lane-headers{display:flex;gap:0;position:sticky;top:0;z-index:40;background:transparent}
   .lane-header{width:var(--lane-width);text-align:center;padding:6px 4px;border-right:1px solid rgba(255,255,255,.03);font-weight:700;color:var(--muted);background:linear-gradient(180deg,rgba(255,255,255,.01),transparent)}
-  .grid{position:relative;height:100%;min-width:1600px;display:flex}
+  .grid{position:relative;height:var(--height);min-width:1600px;display:flex}
   .lane{flex:0 0 var(--lane-width);border-right:1px solid rgba(255,255,255,.03);position:relative;background:linear-gradient(180deg,rgba(255,255,255,.01),transparent)}
   .grid-overlay{position:absolute;left:0;top:0;bottom:0;pointer-events:none;z-index:10}
   .beat-line{position:absolute;top:0;bottom:0;width:1px;background:var(--grid);opacity:.6}
@@ -37,151 +40,141 @@
   .note.selected{outline:2px solid rgba(255,255,255,.12);box-shadow:0 0 8px rgba(6,182,212,.12)}
   .playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--playhead);z-index:50;box-shadow:0 0 8px rgba(239,68,68,.8);pointer-events:none}
   .measure-label{position:absolute;top:6px;left:6px;color:var(--muted);font-size:12px;pointer-events:none}
-  .footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
-  .list{max-height:160px;overflow:auto;margin-top:8px;padding:6px;background:rgba(255,255,255,.01);border-radius:6px}
+  .footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;padding-top:6px}
+  .list{max-height:120px;overflow:auto;padding:6px;background:rgba(255,255,255,.01);border-radius:6px}
   .note-item{display:flex;justify-content:space-between;padding:6px;border-bottom:1px dashed rgba(255,255,255,.02);font-size:13px}
-  .small{font-size:12px;color:var(--muted)}
-  .muted{color:var(--muted)}
   .help{font-size:12px;color:var(--muted);margin-top:8px}
-  .file-row{display:flex;gap:8px;margin-top:8px}
-  input[type=file]{display:none}
   .btn-file{background:#0b1220;border:1px solid rgba(255,255,255,.03);padding:8px;border-radius:6px;color:var(--muted);cursor:pointer}
   .lane-num{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:12px;color:rgba(255,255,255,.06)}
   .tempo-list,.timeSig-list{max-height:120px;overflow:auto;padding:6px;background:rgba(255,255,255,.01);border-radius:6px}
   .event-item{display:flex;justify-content:space-between;padding:6px;border-bottom:1px dashed rgba(255,255,255,.02);font-size:13px}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  @media (max-width:900px){.sidebar{display:none}}
+  @media (max-width:1100px){
+    :root{--toolbar-height:220px}
+    .toolbar{gap:8px}
+    .panel{min-width:48%}
+  }
+  @media (max-width:700px){
+    .toolbar{flex-direction:column;align-items:stretch}
+    .panel{width:100%}
+  }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="sidebar" aria-label="controls">
-    <h1>6鍵 譜面エディタ</h1>
+  <!-- Top toolbar: reorganized controls for horizontal workflow -->
+  <div class="toolbar" role="region" aria-label="上部メニュー">
+    <div class="panel" aria-label="基本設定">
+      <label for="bpm">初期BPM</label>
+      <div class="row">
+        <input id="bpm" type="number" min="20" max="400" value="160" aria-label="初期BPM">
+        <button id="applyBpm" class="secondary">適用</button>
+      </div>
 
-    <label for="bpm">初期BPM</label>
-    <div class="row">
-      <input id="bpm" type="number" min="20" max="400" value="160" aria-label="初期BPM">
-      <button id="applyBpm" class="secondary">適用</button>
+      <label>初期拍子 (分子 / 分母)</label>
+      <div class="row">
+        <input id="beatsPerMeasure" type="number" min="1" max="16" value="4" aria-label="拍子の分子" style="width:80px">
+        <select id="beatUnit" aria-label="拍子の分母" style="width:120px">
+          <option value="4">4分音符</option>
+          <option value="8">8分音符</option>
+          <option value="16">16分音符</option>
+        </select>
+        <button id="applyTime" class="secondary">適用</button>
+      </div>
     </div>
 
-    <label>初期拍子 (分子 / 分母)</label>
-    <div class="row">
-      <input id="beatsPerMeasure" type="number" min="1" max="16" value="4" aria-label="拍子の分子" style="width:80px">
-      <select id="beatUnit" aria-label="拍子の分母" style="width:120px">
-        <option value="4">4分音符</option>
-        <option value="8">8分音符</option>
-        <option value="16">16分音符</option>
-      </select>
-      <button id="applyTime" class="secondary">適用</button>
+    <div class="panel" aria-label="スナップとツール">
+      <label>分解能</label>
+      <div class="row">
+        <select id="subdiv" aria-label="分解能">
+          <option value="1">1 (拍)</option>
+          <option value="2">2 (8分)</option>
+          <option value="4" selected>4 (16分)</option>
+          <option value="8">8 (32分)</option>
+        </select>
+      </div>
+
+      <label>ツール</label>
+      <div class="row">
+        <div class="seg">選択: <span id="toolLabel">タップ</span></div>
+        <button id="toolTap" aria-pressed="true">タップ</button>
+        <button id="toolHold">ホールド</button>
+        <button id="eraseMode" class="secondary">消しゴム (E)</button>
+      </div>
     </div>
 
-    <label>分解能 (1拍あたりのスナップ数)</label>
-    <div class="row">
-      <select id="subdiv" aria-label="分解能">
-        <option value="1">1 (拍単位)</option>
-        <option value="2">2 (8分)</option>
-        <option value="4" selected>4 (16分)</option>
-        <option value="8">8 (32分)</option>
-      </select>
+    <div class="panel" aria-label="再生">
+      <label>再生</label>
+      <div class="row">
+        <button id="play">再生 (Space)</button>
+        <button id="stop" class="secondary" disabled>停止</button>
+        <div class="small muted" style="margin-left:8px">現在位置: <span id="timeLabel">0:00.000</span></div>
+      </div>
+
+      <label>Undo / Redo</label>
+      <div class="row">
+        <button id="undo" class="secondary">元に戻す (Ctrl+Z)</button>
+        <button id="redo" class="secondary">やり直す (Ctrl+Y)</button>
+      </div>
     </div>
 
-    <label>ツール</label>
-    <div class="row controls" role="toolbar" aria-label="ツール">
-      <div class="seg">選択: <span id="toolLabel">タップ</span></div>
-      <button id="toolTap" aria-pressed="true">タップ</button>
-      <button id="toolHold">ホールド</button>
-      <button id="eraseMode" class="secondary">消しゴム (E)</button>
+    <div class="panel" aria-label="イベント">
+      <label>テンポイベント追加</label>
+      <div class="row">
+        <input id="eventBeat" type="number" min="0" value="0" aria-label="イベント開始ビート" style="width:80px">
+        <input id="eventBpm" type="number" min="20" max="400" value="160" aria-label="イベントBPM" style="width:100px">
+        <button id="addTempo" class="secondary">BPM追加</button>
+      </div>
+      <div class="tempo-list" id="tempoList" aria-live="polite"></div>
+
+      <label style="margin-top:6px">拍子イベント追加</label>
+      <div class="row">
+        <input id="eventBeatTS" type="number" min="0" value="0" aria-label="拍子イベント開始ビート" style="width:80px">
+        <input id="eventBeatsPerMeasure" type="number" min="1" max="16" value="4" aria-label="拍子の分子" style="width:80px">
+        <select id="eventBeatUnit" aria-label="拍子の分母" style="width:80px">
+          <option value="4">4</option><option value="8">8</option><option value="16">16</option>
+        </select>
+        <button id="addTimeSig" class="secondary">拍子追加</button>
+      </div>
+      <div class="timeSig-list" id="timeSigList" aria-live="polite"></div>
     </div>
 
-    <label>再生</label>
-    <div class="row">
-      <button id="play">再生 (Space)</button>
-      <button id="stop" class="secondary" disabled>停止</button>
-      <div class="small muted" style="margin-left:8px">現在位置: <span id="timeLabel">0:00.000</span></div>
-    </div>
-
-    <label>テンポ / 拍子イベント</label>
-    <div class="row">
-      <input id="eventBeat" type="number" min="0" value="0" aria-label="イベント開始ビート" style="width:80px">
-      <input id="eventBpm" type="number" min="20" max="400" value="160" aria-label="イベントBPM" style="width:100px">
-      <button id="addTempo" class="secondary">BPM追加</button>
-    </div>
-    <div class="tempo-list" id="tempoList" aria-live="polite"></div>
-
-    <div class="row" style="margin-top:6px">
-      <input id="eventBeatTS" type="number" min="0" value="0" aria-label="拍子イベント開始ビート" style="width:80px">
-      <input id="eventBeatsPerMeasure" type="number" min="1" max="16" value="4" aria-label="拍子の分子" style="width:80px">
-      <select id="eventBeatUnit" aria-label="拍子の分母" style="width:80px">
-        <option value="4">4</option><option value="8">8</option><option value="16">16</option>
-      </select>
-      <button id="addTimeSig" class="secondary">拍子追加</button>
-    </div>
-    <div class="timeSig-list" id="timeSigList" aria-live="polite"></div>
-
-    <label>操作</label>
-    <div class="row">
-      <button id="undo" class="secondary">元に戻す (Ctrl+Z)</button>
-      <button id="redo" class="secondary">やり直す (Ctrl+Y)</button>
-    </div>
-
-    <label>保存 / 読込</label>
-    <div class="file-row">
-      <button id="export" class="secondary">JSON出力</button>
-      <label class="btn-file" for="importFile">読み込む</label>
-      <input id="importFile" type="file" accept=".json">
-    </div>
-
-    <label>ノーツ一覧</label>
-    <div class="list" id="noteList" aria-live="polite"></div>
-
-    <div class="help">
-      <div>操作:</div>
-      <ul style="margin:6px 0 0 18px;padding:0;color:var(--muted)">
-        <li>クリック: タップノーツ追加</li>
-        <li>ドラッグ: ホールド作成 / ノーツ移動（選択時）</li>
-        <li>ノーツ端をドラッグ: ホールド長さ変更</li>
-        <li>1〜6: レーンにタップ追加</li>
-        <li>Space: 再生/停止, E: 消しゴム切替, Delete: 選択ノーツ削除</li>
-        <li>矢印キー: 選択ノーツを微調整</li>
-      </ul>
+    <div class="panel" aria-label="保存">
+      <label>保存 / 読込</label>
+      <div class="row">
+        <button id="export" class="secondary">JSON出力</button>
+        <label class="btn-file" for="importFile">読み込む</label>
+        <input id="importFile" type="file" accept=".json">
+      </div>
+      <div class="small muted" style="margin-top:6px">ショートカット: 1-6でレーンにタップ追加</div>
     </div>
   </div>
 
+  <!-- Main editing area -->
   <div class="main">
     <div class="canvas-wrap" role="region" aria-label="譜面エリア">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="muted">6レーンエディタ</div>
-        <div class="muted small">レーン: 1〜6 左が1</div>
-      </div>
-
-      <div class="timeline" id="timeline" tabindex="0" aria-label="譜面タイムライン">
+      <div class="timeline-wrap" id="timeline" tabindex="0" aria-label="譜面タイムライン">
         <div class="lane-headers" id="laneHeaders" aria-hidden="true"></div>
         <div class="grid" id="grid" aria-hidden="true"></div>
         <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
         <div class="playhead" id="playhead" style="left:0" aria-hidden="true"></div>
       </div>
-    </div>
 
-    <div class="footer">
-      <div class="muted">小節数: <span id="measureCount">16</span></div>
-      <div class="muted">BPM: <span id="bpmLabel">160</span> / 拍子: <span id="timeLabelShort">4/4</span></div>
+      <div class="footer">
+        <div class="muted">小節数: <span id="measureCount">64</span></div>
+        <div class="muted">BPM: <span id="bpmLabel">160</span> / 拍子: <span id="timeLabelShort">4/4</span></div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-/*
-  改良完全版エディタ
-  - 6レーン
-  - タップ / ホールド
-  - ノーツ編集（選択、移動、リサイズ）
-  - 仮想化（表示範囲のみ描画）
-  - BPM / 拍子イベント（任意ビートで変更）
-  - キーボードショートカット & アクセシビリティ
-  - Undo/Redo, JSON入出力
+/* Top-menu version of the editor
+   - Toolbar moved to top for horizontal workflow
+   - Keeps features: 6 lanes, tap/hold, editing, virtualization, tempo/time signature events, keyboard shortcuts
 */
 
-/* ====== 定数 / 初期値 ====== */
+/* ====== constants & initial state ====== */
 const LANES = 6;
 const LANE_WIDTH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--lane-width')) || 80;
 const SNAP_PX = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--snap-px')) || 20;
@@ -191,15 +184,15 @@ const DEFAULT_BEATS_PER_MEASURE = 4;
 const DEFAULT_BEAT_UNIT = 4;
 const DEFAULT_SUBDIV = 4;
 
-/* ====== 状態 ====== */
 let bpm = DEFAULT_BPM;
 let beatsPerMeasure = DEFAULT_BEATS_PER_MEASURE;
 let beatUnit = DEFAULT_BEAT_UNIT;
 let subdiv = DEFAULT_SUBDIV;
 let measures = DEFAULT_MEASURES;
+
 let tool = 'tap'; // 'tap'|'hold'|'erase'|'select'
-let notes = []; // {id, lane, start(beat), length(beat), type:'tap'|'hold'}
-let tempoEvents = [{beat:0, bpm:DEFAULT_BPM}]; // sorted by beat
+let notes = []; // {id, lane, start, length, type}
+let tempoEvents = [{beat:0, bpm:DEFAULT_BPM}];
 let timeSigEvents = [{beat:0, beatsPerMeasure:DEFAULT_BEATS_PER_MEASURE, beatUnit:DEFAULT_BEAT_UNIT}];
 let undoStack = [], redoStack = [];
 let nextId = 1;
@@ -215,14 +208,14 @@ let playIntervalId = null;
 /* DOM */
 let playheadEl, gridEl, timelineEl, laneHeadersEl, gridOverlayEl;
 
-/* virtualization window */
-const RENDER_MARGIN_BEATS = 8; // 前後に余裕を持って描画
+/* virtualization */
+const RENDER_MARGIN_BEATS = 8;
 
-/* selection/editing */
+/* selection/edit */
 let selectedNoteId = null;
-let dragState = null; // {type:'move'|'resize'|'create', id, startMouseX, startBeat, startLane, origStart, origLength}
+let dragState = null;
 
-/* ====== 初期化 ====== */
+/* ====== init ====== */
 document.addEventListener('DOMContentLoaded', () => {
   playheadEl = document.getElementById('playhead');
   gridEl = document.getElementById('grid');
@@ -235,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('bpmLabel').textContent = bpm;
   document.getElementById('bpm').addEventListener('change', e => bpm = Number(e.target.value));
   document.getElementById('applyBpm').addEventListener('click', () => {
-    // apply as initial tempo event at beat 0
     tempoEvents[0] = {beat:0, bpm};
     rebuildTempoList();
     rebuildGrid();
@@ -250,10 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('subdiv').value = subdiv;
-  document.getElementById('subdiv').addEventListener('change', e => {
-    subdiv = Number(e.target.value);
-    rebuildGrid();
-  });
+  document.getElementById('subdiv').addEventListener('change', e => { subdiv = Number(e.target.value); rebuildGrid(); });
 
   document.getElementById('toolTap').addEventListener('click', () => setTool('tap'));
   document.getElementById('toolHold').addEventListener('click', () => setTool('hold'));
@@ -269,9 +258,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('addTimeSig').addEventListener('click', () => {
     const beat = Math.max(0, Number(document.getElementById('eventBeatTS').value) || 0);
-    const bpmN = Math.max(1, Number(document.getElementById('eventBeatsPerMeasure').value) || beatsPerMeasure);
+    const bp = Math.max(1, Number(document.getElementById('eventBeatsPerMeasure').value) || beatsPerMeasure);
     const bu = Number(document.getElementById('eventBeatUnit').value) || beatUnit;
-    addTimeSigEvent({beat, beatsPerMeasure:bpmN, beatUnit:bu});
+    addTimeSigEvent({beat, beatsPerMeasure:bp, beatUnit:bu});
   });
 
   document.getElementById('undo').addEventListener('click', undo);
@@ -285,11 +274,10 @@ document.addEventListener('DOMContentLoaded', () => {
   rebuildTimeSigList();
   rebuildGrid();
   setupMouseAndKeyboard();
-
   refreshNoteList();
 });
 
-/* ====== グリッド / 仮想化 ====== */
+/* ====== grid & overlay ====== */
 function buildLaneHeaders(){
   laneHeadersEl.innerHTML = '';
   for(let i=0;i<LANES;i++){
@@ -304,14 +292,13 @@ function buildLaneHeaders(){
 function rebuildGrid(){
   gridEl.innerHTML = '';
   gridOverlayEl.innerHTML = '';
-  const totalBeats = measures * getBeatsPerMeasureAtBeat(0); // approximate
+  const totalBeats = measures * getBeatsPerMeasureAtBeat(0);
   const columns = totalBeats * subdiv;
   const colWidth = SNAP_PX;
   const gridWidth = Math.max(columns * colWidth, 1200);
   gridEl.style.minWidth = gridWidth + 'px';
   gridOverlayEl.style.width = gridWidth + 'px';
 
-  // lanes
   for(let lane=0;lane<LANES;lane++){
     const laneEl = document.createElement('div');
     laneEl.className = 'lane';
@@ -326,9 +313,7 @@ function rebuildGrid(){
     gridEl.appendChild(laneEl);
   }
 
-  // overlay grid lines and measure labels (draw across full width)
-  const totalBeatsForGrid = measures * getBeatsPerMeasureAtBeat(0);
-  const columnsForGrid = totalBeatsForGrid * subdiv;
+  const columnsForGrid = measures * getBeatsPerMeasureAtBeat(0) * subdiv;
   for(let c=0;c<=columnsForGrid;c++){
     const x = c * colWidth;
     const isBeat = (c % subdiv) === 0;
@@ -350,10 +335,10 @@ function rebuildGrid(){
   }
 
   document.getElementById('measureCount').textContent = measures;
-  renderVisibleNotes(); // virtualization-aware render
+  renderVisibleNotes();
 }
 
-/* compute beatsPerMeasure at a given beat using timeSigEvents */
+/* get beatsPerMeasure at beat */
 function getBeatsPerMeasureAtBeat(beat){
   let last = timeSigEvents[0];
   for(const e of timeSigEvents){
@@ -363,19 +348,14 @@ function getBeatsPerMeasureAtBeat(beat){
   return last.beatsPerMeasure;
 }
 
-/* ====== 仮想化: 表示範囲のノーツのみ描画 ====== */
+/* ====== virtualization render ====== */
 function renderVisibleNotes(){
-  // clear existing note elements
   const laneEls = gridEl.querySelectorAll('.lane');
   laneEls.forEach(laneEl => laneEl.querySelectorAll('.note,.hold').forEach(n => n.remove()));
 
   const scrollLeft = timelineEl.scrollLeft;
   const viewWidth = timelineEl.clientWidth;
   const colWidth = SNAP_PX;
-  const columns = measures * getBeatsPerMeasureAtBeat(0) * subdiv;
-  const gridWidth = Math.max(columns * colWidth, 1200);
-
-  // compute visible beat range
   const leftBeat = Math.max(0, Math.floor((scrollLeft - RENDER_MARGIN_BEATS * colWidth) / colWidth / subdiv));
   const rightBeat = Math.ceil(((scrollLeft + viewWidth) + RENDER_MARGIN_BEATS * colWidth) / colWidth / subdiv);
 
@@ -417,11 +397,7 @@ function renderVisibleNotes(){
   });
 }
 
-/* call renderVisibleNotes on scroll/resize */
-timelineEl?.addEventListener?.('scroll', () => renderVisibleNotes());
-window.addEventListener('resize', () => renderVisibleNotes());
-
-/* ====== ノーツ操作: 追加 / 選択 / 移動 / リサイズ / 削除 ====== */
+/* ====== note data ops ====== */
 function addNoteData(note){
   const n = Object.assign({}, note);
   if(!n.id) n.id = nextId++;
@@ -436,16 +412,10 @@ function removeNoteById(id){
   if(selectedNoteId === id) selectedNoteId = null;
 }
 function findNoteById(id){ return notes.find(n => n.id === id); }
+function selectNote(id){ selectedNoteId = id; renderVisibleNotes(); refreshNoteList(); }
 
-function selectNote(id){
-  selectedNoteId = id;
-  renderVisibleNotes();
-  refreshNoteList();
-}
-
-/* ====== マウス / キーボード操作 ====== */
+/* ====== mouse & keyboard interactions ====== */
 function setupMouseAndKeyboard(){
-  // mouse interactions for grid (create/select/move/resize)
   let isDown = false;
   timelineEl.addEventListener('mousedown', e => {
     if(e.button !== 0) return;
@@ -466,19 +436,18 @@ function setupMouseAndKeyboard(){
       renderVisibleNotes(); refreshNoteList();
     } else if(tool === 'erase'){
       if(hit){ pushUndo(); removeNoteById(hit.id); renderVisibleNotes(); refreshNoteList(); }
-    } else { // select tool
-      if(hit){ selectNote(hit.id); // prepare for move or resize depending on cursor pos
+    } else {
+      if(hit){
+        selectNote(hit.id);
         const el = hit.el;
         const rect = el.getBoundingClientRect();
         const offsetX = e.clientX - rect.left;
-        // if near left/right edge -> resize
         if(hit.type === 'hold' && (offsetX < 8 || offsetX > rect.width - 8)){
           dragState = {type:'resize', id:hit.id, edge: offsetX < 8 ? 'left' : 'right', startMouseX:e.clientX, origStart:hit.note.start, origLength:hit.note.length};
         } else {
           dragState = {type:'move', id:hit.id, startMouseX:e.clientX, startBeat:hit.note.start, startLane:hit.note.lane};
         }
       } else {
-        // clicked empty space -> deselect
         selectNote(null);
       }
     }
@@ -487,7 +456,6 @@ function setupMouseAndKeyboard(){
   window.addEventListener('mousemove', e => {
     if(!isDown || !dragState) return;
     const pos = getGridPosition(e);
-    const colWidth = SNAP_PX;
     if(dragState.type === 'create'){
       const n = findNoteById(dragState.id);
       if(!n) return;
@@ -501,9 +469,7 @@ function setupMouseAndKeyboard(){
       const deltaBeats = Math.round(dx / SNAP_PX / (1/subdiv)) * (1/subdiv);
       const newStart = Math.max(0, dragState.startBeat + deltaBeats);
       n.start = snapToGrid(newStart);
-      // lane change if vertical movement crosses lane boundaries
       const rect = gridEl.getBoundingClientRect();
-      const y = e.clientY - rect.top;
       const lane = Math.floor((e.clientX - rect.left + gridEl.scrollLeft) / LANE_WIDTH);
       n.lane = Math.max(0, Math.min(LANES-1, lane));
       renderVisibleNotes();
@@ -528,41 +494,24 @@ function setupMouseAndKeyboard(){
   window.addEventListener('mouseup', e => {
     if(!isDown) return;
     isDown = false;
-    if(dragState){
-      // finalize
-      dragState = null;
-      renderVisibleNotes();
-      refreshNoteList();
-    }
+    if(dragState){ dragState = null; renderVisibleNotes(); refreshNoteList(); }
   });
 
-  // click on note elements (delegation)
   gridEl.addEventListener('click', e => {
     const el = e.target.closest('.note, .hold');
     if(!el) return;
     const id = Number(el.dataset.id);
-    if(tool === 'erase'){
-      pushUndo(); removeNoteById(id); renderVisibleNotes(); refreshNoteList();
-    } else {
-      selectNote(id);
-    }
+    if(tool === 'erase'){ pushUndo(); removeNoteById(id); renderVisibleNotes(); refreshNoteList(); }
+    else selectNote(id);
   });
 
-  // keyboard shortcuts
   window.addEventListener('keydown', e => {
     if(e.key === ' '){ e.preventDefault(); isPlaying ? stopPlayback() : startPlayback(); }
     if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undo(); }
     if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){ e.preventDefault(); redo(); }
     if(e.key === 'e' || e.key === 'E'){ setTool(tool === 'erase' ? 'select' : 'erase'); }
     if(e.key === 'Delete' || e.key === 'Backspace'){ if(selectedNoteId){ pushUndo(); removeNoteById(selectedNoteId); renderVisibleNotes(); refreshNoteList(); } }
-    if(e.key >= '1' && e.key <= '6'){ // quick add tap to lane
-      const lane = Number(e.key) - 1;
-      const centerBeat = getCenterVisibleBeat();
-      pushUndo();
-      addNoteData({lane, start: snapToGrid(centerBeat), length:1/subdiv, type:'tap'});
-      renderVisibleNotes(); refreshNoteList();
-    }
-    // arrow keys to nudge selected note
+    if(e.key >= '1' && e.key <= '6'){ const lane = Number(e.key) - 1; const centerBeat = getCenterVisibleBeat(); pushUndo(); addNoteData({lane, start: snapToGrid(centerBeat), length:1/subdiv, type:'tap'}); renderVisibleNotes(); refreshNoteList(); }
     if(selectedNoteId){
       const n = findNoteById(selectedNoteId);
       if(!n) return;
@@ -572,9 +521,12 @@ function setupMouseAndKeyboard(){
       if(e.key === 'ArrowDown'){ e.preventDefault(); pushUndo(); n.lane = Math.min(LANES-1, n.lane + 1); renderVisibleNotes(); refreshNoteList(); }
     }
   });
+
+  timelineEl.addEventListener('scroll', () => renderVisibleNotes());
+  window.addEventListener('resize', () => renderVisibleNotes());
 }
 
-/* helper: get beat at mouse position */
+/* helpers */
 function getGridPosition(e){
   const rect = gridEl.getBoundingClientRect();
   const x = (e.clientX - rect.left) + gridEl.scrollLeft;
@@ -584,14 +536,11 @@ function getGridPosition(e){
 }
 function snapToGrid(beat){ const step = 1 / subdiv; return Math.round(beat / step) * step; }
 
-/* detect note at position (returns {note, el, id, type}) */
 function detectNoteAtPos(pos){
-  // check visible notes DOM for hit
   const laneEl = gridEl.children[pos.lane];
   if(!laneEl) return null;
   const children = laneEl.querySelectorAll('.note,.hold');
   for(const el of children){
-    const rect = el.getBoundingClientRect();
     const gridRect = gridEl.getBoundingClientRect();
     const x = pos.x - (gridRect.left - gridEl.scrollLeft);
     const elLeft = el.offsetLeft;
@@ -609,8 +558,6 @@ function detectNoteAtPos(pos){
   }
   return null;
 }
-
-/* get center visible beat for quick add */
 function getCenterVisibleBeat(){
   const scrollLeft = timelineEl.scrollLeft;
   const viewWidth = timelineEl.clientWidth;
@@ -618,7 +565,7 @@ function getCenterVisibleBeat(){
   return (centerX / SNAP_PX) / subdiv;
 }
 
-/* ====== Undo / Redo ====== */
+/* ====== undo/redo ====== */
 function pushUndo(){
   undoStack.push(JSON.stringify({notes, tempoEvents, timeSigEvents}));
   if(undoStack.length > 200) undoStack.shift();
@@ -647,7 +594,7 @@ function redo(){
   renderVisibleNotes(); rebuildTempoList(); rebuildTimeSigList(); refreshNoteList();
 }
 
-/* ====== Tempo / TimeSig イベント管理 ====== */
+/* ====== tempo/time signature events ====== */
 function addTempoEvent(ev){
   tempoEvents.push({beat:ev.beat, bpm:ev.bpm});
   tempoEvents.sort((a,b)=>a.beat-b.beat);
@@ -655,7 +602,7 @@ function addTempoEvent(ev){
   pushUndo();
 }
 function removeTempoEvent(index){
-  if(index === 0) return; // keep initial
+  if(index === 0) return;
   tempoEvents.splice(index,1);
   rebuildTempoList();
   pushUndo();
@@ -696,8 +643,7 @@ function rebuildTimeSigList(){
   });
 }
 
-/* ====== 再生: テンポマップ対応 ====== */
-/* Precompute tempo segments: [{startBeat, bpm, startSec}] */
+/* ====== playback with tempo map ====== */
 function buildTempoMap(){
   const map = [];
   tempoEvents.sort((a,b)=>a.beat-b.beat);
@@ -711,13 +657,9 @@ function buildTempoMap(){
       accSec += beatsSpan * (60 / cur.bpm);
     }
   }
-  // add a final sentinel (no next)
   return map;
 }
-
-/* beat -> seconds using tempo map */
 function beatToSeconds(beat, tempoMap){
-  // find segment
   let seg = tempoMap[tempoMap.length-1];
   for(let i=0;i<tempoMap.length;i++){
     if(i+1 < tempoMap.length && beat >= tempoMap[i+1].startBeat) continue;
@@ -727,10 +669,7 @@ function beatToSeconds(beat, tempoMap){
   const dtBeats = beat - seg.startBeat;
   return seg.startSec + dtBeats * (60 / seg.bpm);
 }
-
-/* seconds -> beat (inverse) */
 function secondsToBeat(sec, tempoMap){
-  // find segment where startSec <= sec < next.startSec
   let segIndex = tempoMap.length - 1;
   for(let i=0;i<tempoMap.length;i++){
     const next = tempoMap[i+1];
@@ -743,7 +682,6 @@ function secondsToBeat(sec, tempoMap){
   return seg.startBeat + dtSec / (60 / seg.bpm);
 }
 
-/* playback */
 function startPlayback(){
   if(isPlaying) return;
   if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -753,7 +691,6 @@ function startPlayback(){
     playStartBeat = 0;
     document.getElementById('play').disabled = true;
     document.getElementById('stop').disabled = false;
-    // reset played flags
     notes.forEach(n => n._played = false);
     rafLoop();
     playIntervalId = setInterval(playbackTick, 40);
@@ -785,7 +722,6 @@ function updatePlayheadByBeat(beat){
   const colWidth = SNAP_PX;
   const leftPx = beat * subdiv * colWidth;
   playheadEl.style.left = leftPx + 'px';
-  // update time label
   const tempoMap = buildTempoMap();
   const sec = beatToSeconds(beat, tempoMap);
   document.getElementById('timeLabel').textContent = formatTime(sec);
@@ -798,7 +734,6 @@ function playbackTick(){
   const tempoMap = buildTempoMap();
   const beatNow = secondsToBeat(elapsed + beatToSeconds(playStartBeat, tempoMap), tempoMap);
   const lookaheadSec = 0.12;
-  const lookaheadBeat = lookaheadSec / (60 / tempoMap[0].bpm); // approximate small
   for(const n of notes){
     if(n._played) continue;
     const noteSec = beatToSeconds(n.start, tempoMap);
@@ -808,7 +743,6 @@ function playbackTick(){
       n._played = true;
     }
   }
-  // metronome tick
   if(typeof playbackTick._lastBeat === 'undefined') playbackTick._lastBeat = -1;
   const beatIndex = Math.floor(beatNow);
   if(beatIndex !== playbackTick._lastBeat){
@@ -817,10 +751,7 @@ function playbackTick(){
     playbackTick._lastBeat = beatIndex;
   }
 }
-
-/* helper: is measure start at beat (consider timeSigEvents) */
 function isMeasureStartAtBeat(beat){
-  // find current time signature
   let ts = timeSigEvents[0];
   for(const t of timeSigEvents){
     if(t.beat <= beat) ts = t;
@@ -828,8 +759,6 @@ function isMeasureStartAtBeat(beat){
   }
   return ((Math.floor(beat) - ts.beat) % ts.beatsPerMeasure) === 0;
 }
-
-/* audio helpers */
 function playClick(volume=0.6){
   if(!audioCtx) return;
   const o = audioCtx.createOscillator();
@@ -838,8 +767,7 @@ function playClick(volume=0.6){
   o.frequency.value = 1000;
   g.gain.value = volume * 0.05;
   o.connect(g); g.connect(audioCtx.destination);
-  o.start();
-  o.stop(audioCtx.currentTime + 0.06);
+  o.start(); o.stop(audioCtx.currentTime + 0.06);
 }
 function playNoteSound(lane, dur=0.12){
   if(!audioCtx) return;
@@ -850,24 +778,15 @@ function playNoteSound(lane, dur=0.12){
   o.frequency.value = base * Math.pow(1.06, lane);
   g.gain.value = 0.08;
   o.connect(g); g.connect(audioCtx.destination);
-  o.start();
-  o.stop(audioCtx.currentTime + dur);
+  o.start(); o.stop(audioCtx.currentTime + dur);
 }
 
-/* ====== JSON 入出力 ====== */
+/* ====== JSON I/O ====== */
 function exportJSON(){
-  const data = {
-    meta:{subdiv, measures},
-    tempoEvents, timeSigEvents,
-    notes
-  };
+  const data = { meta:{subdiv, measures}, tempoEvents, timeSigEvents, notes };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'chart.json';
-  a.click();
-  URL.revokeObjectURL(url);
+  const a = document.createElement('a'); a.href = url; a.download = 'chart.json'; a.click(); URL.revokeObjectURL(url);
 }
 function importJSON(e){
   const file = e.target.files[0];
@@ -876,51 +795,40 @@ function importJSON(e){
   reader.onload = ev => {
     try{
       const data = JSON.parse(ev.target.result);
-      if(data.meta){
-        subdiv = data.meta.subdiv || subdiv;
-        measures = data.meta.measures || measures;
-        document.getElementById('subdiv').value = subdiv;
-      }
+      if(data.meta){ subdiv = data.meta.subdiv || subdiv; measures = data.meta.measures || measures; document.getElementById('subdiv').value = subdiv; }
       if(Array.isArray(data.tempoEvents)) tempoEvents = data.tempoEvents.slice();
       if(Array.isArray(data.timeSigEvents)) timeSigEvents = data.timeSigEvents.slice();
       if(Array.isArray(data.notes)) notes = data.notes.map(n => Object.assign({}, n));
-      // ensure nextId
       const maxId = notes.reduce((m,x)=>Math.max(m, x.id||0), 0);
       nextId = Math.max(nextId, maxId + 1);
       rebuildTempoList(); rebuildTimeSigList(); rebuildGrid(); refreshNoteList(); pushUndo();
-    }catch(err){
-      alert('読み込みエラー: ' + err.message);
-    }
+    }catch(err){ alert('読み込みエラー: ' + err.message); }
   };
   reader.readAsText(file);
   e.target.value = '';
 }
 
-/* ====== UI 更新: ノーツ一覧 ====== */
+/* ====== UI lists ====== */
 function refreshNoteList(){
   const el = document.getElementById('noteList');
+  if(!el) return;
   el.innerHTML = '';
   if(notes.length === 0){ el.innerHTML = '<div class="small muted">ノーツがありません</div>'; return; }
   const sorted = notes.slice().sort((a,b)=> a.start - b.start || a.lane - b.lane);
   for(const n of sorted){
-    const row = document.createElement('div');
-    row.className = 'note-item';
-    const left = document.createElement('div');
-    left.innerHTML = `<strong>${n.type === 'tap' ? 'Tap' : 'Hold'}</strong> L${n.lane+1} @ ${n.start.toFixed(3)}b`;
-    const right = document.createElement('div');
-    right.innerHTML = `<span class="small muted">${n.type==='hold' ? n.length.toFixed(3)+'b' : ''}</span> <button data-id="${n.id}" class="secondary">削除</button>`;
-    row.appendChild(left); row.appendChild(right);
-    el.appendChild(row);
+    const row = document.createElement('div'); row.className = 'note-item';
+    const left = document.createElement('div'); left.innerHTML = `<strong>${n.type === 'tap' ? 'Tap' : 'Hold'}</strong> L${n.lane+1} @ ${n.start.toFixed(3)}b`;
+    const right = document.createElement('div'); right.innerHTML = `<span class="small muted">${n.type==='hold' ? n.length.toFixed(3)+'b' : ''}</span> <button data-id="${n.id}" class="secondary">削除</button>`;
+    row.appendChild(left); row.appendChild(right); el.appendChild(row);
     right.querySelector('button').addEventListener('click', () => { pushUndo(); removeNoteById(n.id); renderVisibleNotes(); refreshNoteList(); });
     row.addEventListener('click', () => selectNote(n.id));
   }
 }
 
-/* ====== ユーティリティ ====== */
+/* ====== misc helpers ====== */
 function setTool(t){
   tool = t;
   document.getElementById('toolLabel').textContent = t === 'tap' ? 'タップ' : t === 'hold' ? 'ホールド' : t === 'erase' ? '消しゴム' : '選択';
-  // update aria-pressed
   document.getElementById('toolTap').setAttribute('aria-pressed', t==='tap');
   document.getElementById('toolHold').setAttribute('aria-pressed', t==='hold');
   document.getElementById('eraseMode').setAttribute('aria-pressed', t==='erase');
@@ -932,17 +840,8 @@ function formatTime(t){
   return `${m}:${s}.${ms}`;
 }
 
-/* ====== 最終レンダリング同期 ====== */
-function renderAll(){
-  rebuildGrid();
-  renderVisibleNotes();
-  refreshNoteList();
-  rebuildTempoList();
-  rebuildTimeSigList();
-}
-
-/* expose some helpers for debugging (optional) */
-window._editor = {notes, tempoEvents, timeSigEvents, renderAll, addNoteData, removeNoteById};
+/* expose for debugging */
+window._editor = {notes, tempoEvents, timeSigEvents, renderVisibleNotes, addNoteData, removeNoteById};
 
 </script>
 </body>
