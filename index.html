@@ -1,682 +1,948 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vapor-Liquid Equilibrium Simulator - Visual Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>6鍵 音ゲー譜面エディタ — 改良完全版</title>
 <style>
-    /* ========================================
-       ベーススタイル・デザイン変数
-       サイバー・モダンBento UI
-       ======================================== */
-    :root {
-        --bg-color: #050505;
-        --card-bg: rgba(20, 20, 25, 0.7);
-        --card-border: rgba(255, 255, 255, 0.15);
-        --accent-blue: #00f0ff;
-        --accent-green: #39ff14;
-        --accent-orange: #ff3c00;
-        --text-main: #ffffff;
-        --text-sub: #a0a0b0;
-        --font-family: 'Inter', 'Noto Sans JP', sans-serif;
-    }
-
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    body {
-        background-color: var(--bg-color);
-        background-image: 
-            radial-gradient(circle at 20% 40%, rgba(0, 240, 255, 0.15), transparent 40%),
-            radial-gradient(circle at 80% 60%, rgba(57, 255, 20, 0.1), transparent 40%);
-        color: var(--text-main);
-        font-family: var(--font-family);
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        overflow-x: hidden;
-    }
-
-    .dashboard {
-        display: grid;
-        grid-template-columns: 280px 360px;
-        grid-template-rows: auto auto;
-        gap: 20px;
-        max-width: 900px;
-    }
-
-    .bento-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 28px;
-        padding: 24px;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .card-title {
-        font-size: 13px;
-        font-weight: 800;
-        color: var(--accent-blue);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-    }
-
-    /* ========================================
-       シミュレータ領域
-       ======================================== */
-    .sim-card {
-        grid-column: 1 / 2;
-        grid-row: 1 / 3;
-        align-items: center;
-    }
-
-    .canvas-container {
-        position: relative;
-        width: 220px;
-        height: 400px;
-        border-radius: 18px;
-        background: #020202;
-        border: 2px solid rgba(255,255,255,0.2);
-        box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), inset 0 0 40px rgba(0,0,0,1);
-        overflow: hidden;
-    }
-
-    canvas {
-        display: block;
-        width: 100%;
-        height: 100%;
-        /* 見た目をさらに鮮やかにするフィルター */
-        filter: contrast(1.1) saturate(1.5);
-    }
-
-    /* ========================================
-       コントロールパネル
-       ======================================== */
-    .controls-card {
-        grid-column: 2 / 3;
-        grid-row: 1 / 2;
-        gap: 16px;
-    }
-
-    .control-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .control-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-    }
-
-    .control-label {
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .control-value {
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--accent-blue);
-        font-variant-numeric: tabular-nums;
-        text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
-    }
-
-    input[type=range] {
-        -webkit-appearance: none;
-        width: 100%;
-        background: transparent;
-        margin-top: 4px;
-        margin-bottom: 4px;
-    }
-    input[type=range]:focus { outline: none; }
-    input[type=range]::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 8px;
-        cursor: pointer;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-    }
-    input[type=range]::-webkit-slider-thumb {
-        height: 20px;
-        width: 20px;
-        border-radius: 50%;
-        background: var(--accent-blue);
-        box-shadow: 0 0 15px var(--accent-blue);
-        cursor: pointer;
-        -webkit-appearance: none;
-        margin-top: -6px;
-        transition: transform 0.1s, background 0.2s;
-    }
-    input[type=range]::-webkit-slider-thumb:active {
-        transform: scale(1.2);
-        background: #ffffff;
-    }
-
-    select {
-        appearance: none;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(0, 240, 255, 0.3);
-        color: white;
-        padding: 12px 14px;
-        font-size: 14px;
-        font-weight: 600;
-        border-radius: 12px;
-        outline: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    select:hover {
-        border-color: var(--accent-blue);
-        box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-    }
-    select:focus {
-        border-color: var(--accent-blue);
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
-    }
-    select option {
-        background: #111;
-        color: white;
-    }
-
-    /* ========================================
-       メトリクスパネル
-       ======================================== */
-    .metrics-card {
-        grid-column: 2 / 3;
-        grid-row: 2 / 3;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-    }
-
-    .metric-item {
-        background: rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 16px;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .metric-label {
-        font-size: 12px;
-        color: var(--text-sub);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .metric-value {
-        font-size: 20px;
-        font-weight: 800;
-        letter-spacing: 0;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 800;
-        width: 100%;
-        margin-top: 4px;
-        text-shadow: 0 0 5px rgba(0,0,0,0.5);
-    }
-    .status-evap { background: rgba(255, 60, 0, 0.8); color: #fff; box-shadow: 0 0 15px rgba(255, 60, 0, 0.5); }
-    .status-cond { background: rgba(57, 255, 20, 0.8); color: #000; box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
-    .status-eq { background: rgba(0, 240, 255, 0.8); color: #000; box-shadow: 0 0 15px rgba(0, 240, 255, 0.5); }
-
-    @media (max-width: 700px) {
-        .dashboard { grid-template-columns: 1fr; }
-        .sim-card, .controls-card, .metrics-card { grid-column: 1 / 2; grid-row: auto; }
-    }
+  :root{
+    --bg:#0f1720; --panel:#0b1220; --accent:#06b6d4; --muted:#94a3b8;
+    --note:#f97316; --hold:#f59e0b; --grid:#1f2937; --playhead:#ef4444;
+    --lane-width:80px; --lane-gap:0; --lane-count:6;
+    --snap-px:20px; /* 1 subdiv 単位のピクセル幅 */
+    --height:420px;
+  }
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:#e6eef6}
+  .app{display:flex;gap:12px;padding:12px;box-sizing:border-box;height:100%}
+  .sidebar{width:360px;background:linear-gradient(180deg,var(--panel),#071022);border-radius:8px;padding:12px;box-sizing:border-box;overflow:auto}
+  .main{flex:1;display:flex;flex-direction:column;gap:12px}
+  h1{font-size:16px;margin:0 0 8px 0;color:#dff6fb}
+  label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .row{display:flex;gap:8px;align-items:center;margin-top:8px}
+  input[type=number],select,input[type=text]{width:100%;padding:6px;border-radius:6px;border:1px solid #123;background:#071022;color:#e6eef6}
+  button{background:var(--accent);border:none;color:#042027;padding:8px 10px;border-radius:6px;cursor:pointer;font-weight:600}
+  button.secondary{background:#1f2937;color:#cfeff6}
+  .controls{display:flex;gap:8px;align-items:center}
+  .canvas-wrap{background:linear-gradient(180deg,#071022,#04101a);padding:10px;border-radius:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
+  .timeline{position:relative;height:var(--height);overflow:auto;border-radius:6px;background:linear-gradient(180deg,#071022,#04101a);border:1px solid rgba(255,255,255,.03)}
+  .lane-headers{display:flex;gap:0;background:transparent;position:sticky;top:0;z-index:40}
+  .lane-header{width:var(--lane-width);text-align:center;padding:6px 4px;border-right:1px solid rgba(255,255,255,.03);font-weight:700;color:var(--muted);background:linear-gradient(180deg,rgba(255,255,255,.01),transparent)}
+  .grid{position:relative;height:100%;min-width:1600px;display:flex}
+  .lane{flex:0 0 var(--lane-width);border-right:1px solid rgba(255,255,255,.03);position:relative;background:linear-gradient(180deg,rgba(255,255,255,.01),transparent)}
+  .grid-overlay{position:absolute;left:0;top:0;bottom:0;pointer-events:none;z-index:10}
+  .beat-line{position:absolute;top:0;bottom:0;width:1px;background:var(--grid);opacity:.6}
+  .sub-line{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.03)}
+  .note{position:absolute;height:18px;border-radius:4px;background:var(--note);left:0;transform:translateY(-50%);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:20}
+  .hold{position:absolute;height:18px;border-radius:4px;background:linear-gradient(90deg,var(--hold),#f97316);left:0;transform:translateY(-50%);box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:20}
+  .note.selected{outline:2px solid rgba(255,255,255,.12);box-shadow:0 0 8px rgba(6,182,212,.12)}
+  .playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--playhead);z-index:50;box-shadow:0 0 8px rgba(239,68,68,.8);pointer-events:none}
+  .measure-label{position:absolute;top:6px;left:6px;color:var(--muted);font-size:12px;pointer-events:none}
+  .footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+  .list{max-height:160px;overflow:auto;margin-top:8px;padding:6px;background:rgba(255,255,255,.01);border-radius:6px}
+  .note-item{display:flex;justify-content:space-between;padding:6px;border-bottom:1px dashed rgba(255,255,255,.02);font-size:13px}
+  .small{font-size:12px;color:var(--muted)}
+  .muted{color:var(--muted)}
+  .help{font-size:12px;color:var(--muted);margin-top:8px}
+  .file-row{display:flex;gap:8px;margin-top:8px}
+  input[type=file]{display:none}
+  .btn-file{background:#0b1220;border:1px solid rgba(255,255,255,.03);padding:8px;border-radius:6px;color:var(--muted);cursor:pointer}
+  .lane-num{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:12px;color:rgba(255,255,255,.06)}
+  .tempo-list,.timeSig-list{max-height:120px;overflow:auto;padding:6px;background:rgba(255,255,255,.01);border-radius:6px}
+  .event-item{display:flex;justify-content:space-between;padding:6px;border-bottom:1px dashed rgba(255,255,255,.02);font-size:13px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  @media (max-width:900px){.sidebar{display:none}}
 </style>
 </head>
 <body>
+<div class="app">
+  <div class="sidebar" aria-label="controls">
+    <h1>6鍵 譜面エディタ</h1>
 
-<div class="dashboard">
-    <div class="bento-card sim-card">
-        <div class="card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
-            Particle Vision
-        </div>
-        <div class="canvas-container">
-            <canvas id="simCanvas" width="440" height="800"></canvas>
-        </div>
+    <label for="bpm">初期BPM</label>
+    <div class="row">
+      <input id="bpm" type="number" min="20" max="400" value="160" aria-label="初期BPM">
+      <button id="applyBpm" class="secondary">適用</button>
     </div>
 
-    <div class="bento-card controls-card">
-        <div class="card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            System Override
-        </div>
-
-        <div class="control-group">
-            <div class="control-header">
-                <span class="control-label">物質 (Substance)</span>
-            </div>
-            <select id="substanceSelect">
-                <option value="water">水 (Water)</option>
-                <option value="ethanol">エタノール (Ethanol)</option>
-                <option value="diethylether">ジエチルエーテル (Diethyl Ether)</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <div class="control-header">
-                <span class="control-label">温度 (Temperature)</span>
-                <span class="control-value" id="tempDisp">25 °C</span>
-            </div>
-            <input type="range" id="tempSlider" min="-20" max="150" value="25" step="1">
-        </div>
-
-        <div class="control-group">
-            <div class="control-header">
-                <span class="control-label">ピストン位置 (Volume)</span>
-                <span class="control-value" id="volDisp">5.0 L</span>
-            </div>
-            <input type="range" id="volSlider" min="2" max="10" value="5" step="0.1">
-        </div>
-
-        <div class="control-group">
-            <div class="control-header">
-                <span class="control-label">シミュレーション速度 (Time Speed)</span>
-                <span class="control-value" id="speedDisp">1.0x</span>
-            </div>
-            <input type="range" id="speedSlider" min="0.1" max="5.0" value="1.0" step="0.1">
-        </div>
+    <label>初期拍子 (分子 / 分母)</label>
+    <div class="row">
+      <input id="beatsPerMeasure" type="number" min="1" max="16" value="4" aria-label="拍子の分子" style="width:80px">
+      <select id="beatUnit" aria-label="拍子の分母" style="width:120px">
+        <option value="4">4分音符</option>
+        <option value="8">8分音符</option>
+        <option value="16">16分音符</option>
+      </select>
+      <button id="applyTime" class="secondary">適用</button>
     </div>
 
-    <div class="bento-card metrics-card">
-        <div class="card-title" style="grid-column: 1 / 3;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-            Live Telemetry
-        </div>
-        
-        <div class="metric-item">
-            <span class="metric-label">飽和蒸気圧</span>
-            <span class="metric-value" id="vapPresDisp">-- hPa</span>
-        </div>
-        <div class="metric-item">
-            <span class="metric-label">現在気体圧力</span>
-            <span class="metric-value" id="curPresDisp">-- hPa</span>
-        </div>
-        <div class="metric-item" style="grid-column: 1 / 3;">
-            <span class="metric-label">気体 / 液体 モル数</span>
-            <span class="metric-value" id="molDisp">-- / -- mol</span>
-        </div>
-        <div class="metric-item" style="grid-column: 1 / 3;">
-            <div id="statusBadge" class="status-badge status-eq">気液平衡</div>
-        </div>
+    <label>分解能 (1拍あたりのスナップ数)</label>
+    <div class="row">
+      <select id="subdiv" aria-label="分解能">
+        <option value="1">1 (拍単位)</option>
+        <option value="2">2 (8分)</option>
+        <option value="4" selected>4 (16分)</option>
+        <option value="8">8 (32分)</option>
+      </select>
     </div>
+
+    <label>ツール</label>
+    <div class="row controls" role="toolbar" aria-label="ツール">
+      <div class="seg">選択: <span id="toolLabel">タップ</span></div>
+      <button id="toolTap" aria-pressed="true">タップ</button>
+      <button id="toolHold">ホールド</button>
+      <button id="eraseMode" class="secondary">消しゴム (E)</button>
+    </div>
+
+    <label>再生</label>
+    <div class="row">
+      <button id="play">再生 (Space)</button>
+      <button id="stop" class="secondary" disabled>停止</button>
+      <div class="small muted" style="margin-left:8px">現在位置: <span id="timeLabel">0:00.000</span></div>
+    </div>
+
+    <label>テンポ / 拍子イベント</label>
+    <div class="row">
+      <input id="eventBeat" type="number" min="0" value="0" aria-label="イベント開始ビート" style="width:80px">
+      <input id="eventBpm" type="number" min="20" max="400" value="160" aria-label="イベントBPM" style="width:100px">
+      <button id="addTempo" class="secondary">BPM追加</button>
+    </div>
+    <div class="tempo-list" id="tempoList" aria-live="polite"></div>
+
+    <div class="row" style="margin-top:6px">
+      <input id="eventBeatTS" type="number" min="0" value="0" aria-label="拍子イベント開始ビート" style="width:80px">
+      <input id="eventBeatsPerMeasure" type="number" min="1" max="16" value="4" aria-label="拍子の分子" style="width:80px">
+      <select id="eventBeatUnit" aria-label="拍子の分母" style="width:80px">
+        <option value="4">4</option><option value="8">8</option><option value="16">16</option>
+      </select>
+      <button id="addTimeSig" class="secondary">拍子追加</button>
+    </div>
+    <div class="timeSig-list" id="timeSigList" aria-live="polite"></div>
+
+    <label>操作</label>
+    <div class="row">
+      <button id="undo" class="secondary">元に戻す (Ctrl+Z)</button>
+      <button id="redo" class="secondary">やり直す (Ctrl+Y)</button>
+    </div>
+
+    <label>保存 / 読込</label>
+    <div class="file-row">
+      <button id="export" class="secondary">JSON出力</button>
+      <label class="btn-file" for="importFile">読み込む</label>
+      <input id="importFile" type="file" accept=".json">
+    </div>
+
+    <label>ノーツ一覧</label>
+    <div class="list" id="noteList" aria-live="polite"></div>
+
+    <div class="help">
+      <div>操作:</div>
+      <ul style="margin:6px 0 0 18px;padding:0;color:var(--muted)">
+        <li>クリック: タップノーツ追加</li>
+        <li>ドラッグ: ホールド作成 / ノーツ移動（選択時）</li>
+        <li>ノーツ端をドラッグ: ホールド長さ変更</li>
+        <li>1〜6: レーンにタップ追加</li>
+        <li>Space: 再生/停止, E: 消しゴム切替, Delete: 選択ノーツ削除</li>
+        <li>矢印キー: 選択ノーツを微調整</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="canvas-wrap" role="region" aria-label="譜面エリア">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="muted">6レーンエディタ</div>
+        <div class="muted small">レーン: 1〜6 左が1</div>
+      </div>
+
+      <div class="timeline" id="timeline" tabindex="0" aria-label="譜面タイムライン">
+        <div class="lane-headers" id="laneHeaders" aria-hidden="true"></div>
+        <div class="grid" id="grid" aria-hidden="true"></div>
+        <div class="grid-overlay" id="gridOverlay" aria-hidden="true"></div>
+        <div class="playhead" id="playhead" style="left:0" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="muted">小節数: <span id="measureCount">16</span></div>
+      <div class="muted">BPM: <span id="bpmLabel">160</span> / 拍子: <span id="timeLabelShort">4/4</span></div>
+    </div>
+  </div>
 </div>
 
 <script>
-/**
- * ========================================
- * バチバチ派手なパーティクルエフェクト特化版
- * ========================================
- */
+/*
+  改良完全版エディタ
+  - 6レーン
+  - タップ / ホールド
+  - ノーツ編集（選択、移動、リサイズ）
+  - 仮想化（表示範囲のみ描画）
+  - BPM / 拍子イベント（任意ビートで変更）
+  - キーボードショートカット & アクセシビリティ
+  - Undo/Redo, JSON入出力
+*/
 
-// 色をネオンカラーに調整して発光感をマシマシに
-const SUBSTANCES = {
-    water: {
-        name: "水", A: 8.07131, B: 1730.63, C: 233.426,
-        colorL: "rgba(0, 240, 255, 0.8)", colorD: "rgba(0, 100, 255, 0.9)"
-    },
-    ethanol: {
-        name: "エタノール", A: 8.20417, B: 1642.89, C: 230.300,
-        colorL: "rgba(255, 100, 0, 0.8)", colorD: "rgba(255, 40, 0, 0.9)"
-    },
-    diethylether: {
-        name: "ジエチルエーテル", A: 6.98685, B: 1064.63, C: 228.000,
-        colorL: "rgba(57, 255, 20, 0.8)", colorD: "rgba(0, 150, 0, 0.9)"
+/* ====== 定数 / 初期値 ====== */
+const LANES = 6;
+const LANE_WIDTH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--lane-width')) || 80;
+const SNAP_PX = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--snap-px')) || 20;
+const DEFAULT_MEASURES = 64;
+const DEFAULT_BPM = 160;
+const DEFAULT_BEATS_PER_MEASURE = 4;
+const DEFAULT_BEAT_UNIT = 4;
+const DEFAULT_SUBDIV = 4;
+
+/* ====== 状態 ====== */
+let bpm = DEFAULT_BPM;
+let beatsPerMeasure = DEFAULT_BEATS_PER_MEASURE;
+let beatUnit = DEFAULT_BEAT_UNIT;
+let subdiv = DEFAULT_SUBDIV;
+let measures = DEFAULT_MEASURES;
+let tool = 'tap'; // 'tap'|'hold'|'erase'|'select'
+let notes = []; // {id, lane, start(beat), length(beat), type:'tap'|'hold'}
+let tempoEvents = [{beat:0, bpm:DEFAULT_BPM}]; // sorted by beat
+let timeSigEvents = [{beat:0, beatsPerMeasure:DEFAULT_BEATS_PER_MEASURE, beatUnit:DEFAULT_BEAT_UNIT}];
+let undoStack = [], redoStack = [];
+let nextId = 1;
+
+/* playback */
+let audioCtx = null;
+let isPlaying = false;
+let playStartTime = 0;
+let playStartBeat = 0;
+let rafId = null;
+let playIntervalId = null;
+
+/* DOM */
+let playheadEl, gridEl, timelineEl, laneHeadersEl, gridOverlayEl;
+
+/* virtualization window */
+const RENDER_MARGIN_BEATS = 8; // 前後に余裕を持って描画
+
+/* selection/editing */
+let selectedNoteId = null;
+let dragState = null; // {type:'move'|'resize'|'create', id, startMouseX, startBeat, startLane, origStart, origLength}
+
+/* ====== 初期化 ====== */
+document.addEventListener('DOMContentLoaded', () => {
+  playheadEl = document.getElementById('playhead');
+  gridEl = document.getElementById('grid');
+  timelineEl = document.getElementById('timeline');
+  laneHeadersEl = document.getElementById('laneHeaders');
+  gridOverlayEl = document.getElementById('gridOverlay');
+
+  // UI bindings
+  document.getElementById('bpm').value = bpm;
+  document.getElementById('bpmLabel').textContent = bpm;
+  document.getElementById('bpm').addEventListener('change', e => bpm = Number(e.target.value));
+  document.getElementById('applyBpm').addEventListener('click', () => {
+    // apply as initial tempo event at beat 0
+    tempoEvents[0] = {beat:0, bpm};
+    rebuildTempoList();
+    rebuildGrid();
+  });
+
+  document.getElementById('beatsPerMeasure').value = beatsPerMeasure;
+  document.getElementById('beatUnit').value = beatUnit;
+  document.getElementById('applyTime').addEventListener('click', () => {
+    timeSigEvents[0] = {beat:0, beatsPerMeasure:Number(document.getElementById('beatsPerMeasure').value), beatUnit:Number(document.getElementById('beatUnit').value)};
+    rebuildTimeSigList();
+    rebuildGrid();
+  });
+
+  document.getElementById('subdiv').value = subdiv;
+  document.getElementById('subdiv').addEventListener('change', e => {
+    subdiv = Number(e.target.value);
+    rebuildGrid();
+  });
+
+  document.getElementById('toolTap').addEventListener('click', () => setTool('tap'));
+  document.getElementById('toolHold').addEventListener('click', () => setTool('hold'));
+  document.getElementById('eraseMode').addEventListener('click', () => setTool('erase'));
+
+  document.getElementById('play').addEventListener('click', startPlayback);
+  document.getElementById('stop').addEventListener('click', stopPlayback);
+
+  document.getElementById('addTempo').addEventListener('click', () => {
+    const beat = Math.max(0, Number(document.getElementById('eventBeat').value) || 0);
+    const b = Math.max(20, Number(document.getElementById('eventBpm').value) || bpm);
+    addTempoEvent({beat, bpm:b});
+  });
+  document.getElementById('addTimeSig').addEventListener('click', () => {
+    const beat = Math.max(0, Number(document.getElementById('eventBeatTS').value) || 0);
+    const bpmN = Math.max(1, Number(document.getElementById('eventBeatsPerMeasure').value) || beatsPerMeasure);
+    const bu = Number(document.getElementById('eventBeatUnit').value) || beatUnit;
+    addTimeSigEvent({beat, beatsPerMeasure:bpmN, beatUnit:bu});
+  });
+
+  document.getElementById('undo').addEventListener('click', undo);
+  document.getElementById('redo').addEventListener('click', redo);
+
+  document.getElementById('export').addEventListener('click', exportJSON);
+  document.getElementById('importFile').addEventListener('change', importJSON);
+
+  buildLaneHeaders();
+  rebuildTempoList();
+  rebuildTimeSigList();
+  rebuildGrid();
+  setupMouseAndKeyboard();
+
+  refreshNoteList();
+});
+
+/* ====== グリッド / 仮想化 ====== */
+function buildLaneHeaders(){
+  laneHeadersEl.innerHTML = '';
+  for(let i=0;i<LANES;i++){
+    const h = document.createElement('div');
+    h.className = 'lane-header';
+    h.style.width = `var(--lane-width)`;
+    h.textContent = `Lane ${i+1}`;
+    laneHeadersEl.appendChild(h);
+  }
+}
+
+function rebuildGrid(){
+  gridEl.innerHTML = '';
+  gridOverlayEl.innerHTML = '';
+  const totalBeats = measures * getBeatsPerMeasureAtBeat(0); // approximate
+  const columns = totalBeats * subdiv;
+  const colWidth = SNAP_PX;
+  const gridWidth = Math.max(columns * colWidth, 1200);
+  gridEl.style.minWidth = gridWidth + 'px';
+  gridOverlayEl.style.width = gridWidth + 'px';
+
+  // lanes
+  for(let lane=0;lane<LANES;lane++){
+    const laneEl = document.createElement('div');
+    laneEl.className = 'lane';
+    laneEl.style.width = `var(--lane-width)`;
+    laneEl.dataset.lane = lane;
+    laneEl.style.position = 'relative';
+    laneEl.style.height = 'var(--height)';
+    const ln = document.createElement('div');
+    ln.className = 'lane-num';
+    ln.textContent = lane+1;
+    laneEl.appendChild(ln);
+    gridEl.appendChild(laneEl);
+  }
+
+  // overlay grid lines and measure labels (draw across full width)
+  const totalBeatsForGrid = measures * getBeatsPerMeasureAtBeat(0);
+  const columnsForGrid = totalBeatsForGrid * subdiv;
+  for(let c=0;c<=columnsForGrid;c++){
+    const x = c * colWidth;
+    const isBeat = (c % subdiv) === 0;
+    const isMeasure = (c % (subdiv * getBeatsPerMeasureAtBeat(0))) === 0;
+    const line = document.createElement('div');
+    line.style.left = x + 'px';
+    line.className = isBeat ? 'beat-line' : 'sub-line';
+    line.style.position = 'absolute';
+    if(isMeasure){
+      line.style.background = 'rgba(255,255,255,.06)';
+      const label = document.createElement('div');
+      label.className = 'measure-label';
+      const measureIndex = Math.floor(c / (subdiv * getBeatsPerMeasureAtBeat(0))) + 1;
+      label.textContent = 'M' + measureIndex;
+      label.style.left = (x + 4) + 'px';
+      gridOverlayEl.appendChild(label);
     }
-};
+    gridOverlayEl.appendChild(line);
+  }
 
-const R_kPa = 8.31446; 
-const TOTAL_MOL = 50.0; 
-const LIQUID_VOL_PER_MOL = 0.04; 
-const MAX_VOL = 10.0; 
+  document.getElementById('measureCount').textContent = measures;
+  renderVisibleNotes(); // virtualization-aware render
+}
 
-let currentSubstance = SUBSTANCES.water;
+/* compute beatsPerMeasure at a given beat using timeSigEvents */
+function getBeatsPerMeasureAtBeat(beat){
+  let last = timeSigEvents[0];
+  for(const e of timeSigEvents){
+    if(e.beat <= beat) last = e;
+    else break;
+  }
+  return last.beatsPerMeasure;
+}
 
-let state = {
-    tempC: 25,
-    tempK: 298.15,
-    containerVol: 5.0,
-    liquidMol: 25.0,
-    gasMol: 25.0,
-    timeSpeed: 1.0,
-    vaporPressurePa: 0,
-    currentPressurePa: 0
-};
+/* ====== 仮想化: 表示範囲のノーツのみ描画 ====== */
+function renderVisibleNotes(){
+  // clear existing note elements
+  const laneEls = gridEl.querySelectorAll('.lane');
+  laneEls.forEach(laneEl => laneEl.querySelectorAll('.note,.hold').forEach(n => n.remove()));
 
-const UI = {
-    substance: document.getElementById('substanceSelect'),
-    temp: document.getElementById('tempSlider'),
-    vol: document.getElementById('volSlider'),
-    speed: document.getElementById('speedSlider'),
-    tempDisp: document.getElementById('tempDisp'),
-    volDisp: document.getElementById('volDisp'),
-    speedDisp: document.getElementById('speedDisp'),
-    vapPresDisp: document.getElementById('vapPresDisp'),
-    curPresDisp: document.getElementById('curPresDisp'),
-    molDisp: document.getElementById('molDisp'),
-    statusBadge: document.getElementById('statusBadge'),
-    canvas: document.getElementById('simCanvas')
-};
-const ctx = UI.canvas.getContext('2d');
+  const scrollLeft = timelineEl.scrollLeft;
+  const viewWidth = timelineEl.clientWidth;
+  const colWidth = SNAP_PX;
+  const columns = measures * getBeatsPerMeasureAtBeat(0) * subdiv;
+  const gridWidth = Math.max(columns * colWidth, 1200);
 
-const CANVAS_W = 440;
-const CANVAS_H = 800; 
-const PISTON_H = 40;
+  // compute visible beat range
+  const leftBeat = Math.max(0, Math.floor((scrollLeft - RENDER_MARGIN_BEATS * colWidth) / colWidth / subdiv));
+  const rightBeat = Math.ceil(((scrollLeft + viewWidth) + RENDER_MARGIN_BEATS * colWidth) / colWidth / subdiv);
 
-// 【見栄え特化】パーティクルの量をめちゃくちゃ増やす！
-const PARTICLE_RATIO = 12; // 1molあたり12個。合計600個のパーティクルが飛び交う
-let particles = [];
+  const visibleNotes = notes.filter(n => {
+    const s = n.start;
+    const e = n.start + n.length;
+    return e >= leftBeat && s <= rightBeat;
+  });
 
-class Particle {
-    constructor(isGas) {
-        this.isGas = isGas;
-        // 気体は少し小さく、液体は少し大きくしてメリハリを
-        this.radius = isGas ? 3 : 5; 
-        this.vx = (Math.random() - 0.5) * 20;
-        this.vy = (Math.random() - 0.5) * 20;
-        this.x = CANVAS_W / 2;
-        this.y = CANVAS_H / 2;
-        this.resetPosition();
+  visibleNotes.forEach(n => {
+    if(n.lane < 0 || n.lane >= LANES) return;
+    const laneEl = gridEl.children[n.lane];
+    if(!laneEl) return;
+    const left = Math.round((n.start * subdiv) * colWidth);
+    const width = Math.max(Math.round((n.length || (1/subdiv)) * subdiv * colWidth), 6);
+    if(n.type === 'tap'){
+      const el = document.createElement('div');
+      el.className = 'note' + (n.id === selectedNoteId ? ' selected' : '');
+      el.style.left = (left - 5) + 'px';
+      el.style.top = '50%';
+      el.style.width = '10px';
+      el.dataset.id = n.id;
+      el.dataset.type = 'tap';
+      el.setAttribute('role','button');
+      el.setAttribute('aria-label', `Tap lane ${n.lane+1} beat ${n.start.toFixed(3)}`);
+      laneEl.appendChild(el);
+    } else if(n.type === 'hold'){
+      const el = document.createElement('div');
+      el.className = 'hold' + (n.id === selectedNoteId ? ' selected' : '');
+      el.style.left = left + 'px';
+      el.style.top = '50%';
+      el.style.width = width + 'px';
+      el.dataset.id = n.id;
+      el.dataset.type = 'hold';
+      el.setAttribute('role','button');
+      el.setAttribute('aria-label', `Hold lane ${n.lane+1} beat ${n.start.toFixed(3)} length ${n.length.toFixed(3)}`);
+      laneEl.appendChild(el);
     }
+  });
+}
 
-    resetPosition() {
-        const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
-        const liquidH = CANVAS_H * (liquidVolL / MAX_VOL);
-        const liquidY = CANVAS_H - liquidH;
-        const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
+/* call renderVisibleNotes on scroll/resize */
+timelineEl?.addEventListener?.('scroll', () => renderVisibleNotes());
+window.addEventListener('resize', () => renderVisibleNotes());
 
-        this.radius = this.isGas ? Math.random() * 2 + 2 : Math.random() * 2 + 4;
+/* ====== ノーツ操作: 追加 / 選択 / 移動 / リサイズ / 削除 ====== */
+function addNoteData(note){
+  const n = Object.assign({}, note);
+  if(!n.id) n.id = nextId++;
+  if(n.type === 'tap') n.length = 1/subdiv;
+  notes.push(n);
+  notes.sort((a,b)=> a.start - b.start || a.lane - b.lane);
+  return n.id;
+}
+function removeNoteById(id){
+  const idx = notes.findIndex(n => n.id === id);
+  if(idx >= 0) notes.splice(idx,1);
+  if(selectedNoteId === id) selectedNoteId = null;
+}
+function findNoteById(id){ return notes.find(n => n.id === id); }
 
-        if (this.isGas) {
-            this.x = this.radius + Math.random() * (CANVAS_W - this.radius * 2);
-            this.y = pistonBottom + this.radius + Math.random() * (liquidY - pistonBottom - this.radius * 2);
-            // 湧き出た瞬間に激しく動くように
-            this.vx = (Math.random() - 0.5) * 50;
-            this.vy = (Math.random() - 0.5) * 50;
+function selectNote(id){
+  selectedNoteId = id;
+  renderVisibleNotes();
+  refreshNoteList();
+}
+
+/* ====== マウス / キーボード操作 ====== */
+function setupMouseAndKeyboard(){
+  // mouse interactions for grid (create/select/move/resize)
+  let isDown = false;
+  timelineEl.addEventListener('mousedown', e => {
+    if(e.button !== 0) return;
+    const pos = getGridPosition(e);
+    isDown = true;
+    const hit = detectNoteAtPos(pos);
+    if(tool === 'tap'){
+      pushUndo();
+      const beat = snapToGrid(pos.beat);
+      addNoteData({lane:pos.lane, start:beat, length:1/subdiv, type:'tap'});
+      renderVisibleNotes(); refreshNoteList();
+    } else if(tool === 'hold'){
+      pushUndo();
+      const beat = snapToGrid(pos.beat);
+      const id = addNoteData({lane:pos.lane, start:beat, length:1/subdiv, type:'hold'});
+      selectNote(id);
+      dragState = {type:'create', id, startMouseX:e.clientX, startBeat:beat, lane:pos.lane};
+      renderVisibleNotes(); refreshNoteList();
+    } else if(tool === 'erase'){
+      if(hit){ pushUndo(); removeNoteById(hit.id); renderVisibleNotes(); refreshNoteList(); }
+    } else { // select tool
+      if(hit){ selectNote(hit.id); // prepare for move or resize depending on cursor pos
+        const el = hit.el;
+        const rect = el.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        // if near left/right edge -> resize
+        if(hit.type === 'hold' && (offsetX < 8 || offsetX > rect.width - 8)){
+          dragState = {type:'resize', id:hit.id, edge: offsetX < 8 ? 'left' : 'right', startMouseX:e.clientX, origStart:hit.note.start, origLength:hit.note.length};
         } else {
-            this.x = this.radius + Math.random() * (CANVAS_W - this.radius * 2);
-            this.y = liquidY + this.radius + Math.random() * (liquidH - this.radius * 2);
+          dragState = {type:'move', id:hit.id, startMouseX:e.clientX, startBeat:hit.note.start, startLane:hit.note.lane};
         }
+      } else {
+        // clicked empty space -> deselect
+        selectNote(null);
+      }
     }
+  });
 
-    update(dt, pistonBottom, liquidY) {
-        const baseSpeed = Math.sqrt(state.tempK / 298.15) * state.timeSpeed;
-        
-        if (this.isGas) {
-            // 【見栄え特化】気体パーティクルの速度を爆上げして画面中を飛び回らせる
-            const speedMultiplier = 60 * baseSpeed; 
-            this.x += this.vx * speedMultiplier * dt;
-            this.y += this.vy * speedMultiplier * dt;
-
-            // X軸の壁反射
-            if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
-            else if (this.x > CANVAS_W - this.radius) { this.x = CANVAS_W - this.radius; this.vx *= -1; }
-
-            // Y軸の反射
-            if (this.y < pistonBottom + this.radius) {
-                this.y = pistonBottom + this.radius;
-                this.vy *= -1;
-            } else if (this.y > liquidY - this.radius) {
-                this.y = liquidY - this.radius;
-                this.vy *= -1;
-            }
-            this.y = Math.max(pistonBottom + this.radius, Math.min(liquidY - this.radius, this.y));
-
-        } else {
-            // 液体の中は少しゆったりだけど動きは残す
-            const speedMultiplier = 5 * baseSpeed;
-            this.vx += (Math.random() - 0.5) * 5;
-            this.vy += (Math.random() - 0.5) * 5;
-            this.vx *= 0.92;
-            this.vy *= 0.92;
-
-            this.x += this.vx * speedMultiplier * dt;
-            this.y += this.vy * speedMultiplier * dt;
-
-            if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
-            else if (this.x > CANVAS_W - this.radius) { this.x = CANVAS_W - this.radius; this.vx *= -1; }
-
-            if (this.y < liquidY + this.radius) { 
-                this.y = liquidY + this.radius; 
-                this.vy = Math.abs(this.vy); 
-            } else if (this.y > CANVAS_H - this.radius) { 
-                this.y = CANVAS_H - this.radius; 
-                this.vy = -Math.abs(this.vy); 
-            }
-            this.y = Math.max(liquidY + this.radius, Math.min(CANVAS_H - this.radius, this.y));
-        }
+  window.addEventListener('mousemove', e => {
+    if(!isDown || !dragState) return;
+    const pos = getGridPosition(e);
+    const colWidth = SNAP_PX;
+    if(dragState.type === 'create'){
+      const n = findNoteById(dragState.id);
+      if(!n) return;
+      const endBeat = Math.max(snapToGrid(pos.beat), n.start + 1/subdiv);
+      n.length = Math.max(endBeat - n.start, 1/subdiv);
+      renderVisibleNotes();
+    } else if(dragState.type === 'move'){
+      const n = findNoteById(dragState.id);
+      if(!n) return;
+      const dx = e.clientX - dragState.startMouseX;
+      const deltaBeats = Math.round(dx / SNAP_PX / (1/subdiv)) * (1/subdiv);
+      const newStart = Math.max(0, dragState.startBeat + deltaBeats);
+      n.start = snapToGrid(newStart);
+      // lane change if vertical movement crosses lane boundaries
+      const rect = gridEl.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const lane = Math.floor((e.clientX - rect.left + gridEl.scrollLeft) / LANE_WIDTH);
+      n.lane = Math.max(0, Math.min(LANES-1, lane));
+      renderVisibleNotes();
+    } else if(dragState.type === 'resize'){
+      const n = findNoteById(dragState.id);
+      if(!n) return;
+      const dx = e.clientX - dragState.startMouseX;
+      const deltaBeats = Math.round(dx / SNAP_PX / (1/subdiv)) * (1/subdiv);
+      if(dragState.edge === 'right'){
+        const newLen = Math.max(1/subdiv, dragState.origLength + deltaBeats);
+        n.length = snapToGrid(newLen);
+      } else {
+        const newStart = Math.max(0, dragState.origStart + deltaBeats);
+        const newLen = Math.max(1/subdiv, dragState.origLength - (newStart - dragState.origStart));
+        n.start = snapToGrid(newStart);
+        n.length = snapToGrid(newLen);
+      }
+      renderVisibleNotes();
     }
+  });
 
-    draw(ctx, color) {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        
-        if (this.isGas) {
-            // 気体は白っぽく光らせる
-            ctx.fillStyle = "#ffffff";
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = color.replace("0.8", "1");
-        } else {
-            // 液体は少し透け感を出して密集した時の美しさを重視
-            ctx.fillStyle = color.replace("0.8", "0.6");
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = color;
-        }
-        ctx.fill();
-        ctx.shadowBlur = 0; // リセット
+  window.addEventListener('mouseup', e => {
+    if(!isDown) return;
+    isDown = false;
+    if(dragState){
+      // finalize
+      dragState = null;
+      renderVisibleNotes();
+      refreshNoteList();
     }
-}
+  });
 
-function syncParticles() {
-    // 【見栄え特化】見かけ上、気体の最低数を底上げして、どんな状況でも少しは飛んでいるようにする
-    let visualGasMol = state.gasMol + (state.liquidMol > 0 ? 5 : 0); 
-    if(visualGasMol > TOTAL_MOL) visualGasMol = TOTAL_MOL;
-
-    const targetGas = Math.floor(visualGasMol * PARTICLE_RATIO);
-    const targetLiquid = Math.floor((TOTAL_MOL - visualGasMol) * PARTICLE_RATIO);
-    
-    let currentGas = particles.filter(p => p.isGas).length;
-    let currentLiquid = particles.filter(p => !p.isGas).length;
-
-    while (currentGas < targetGas && currentLiquid > 0) {
-        const p = particles.find(p => !p.isGas);
-        if (p) { p.isGas = true; p.resetPosition(); currentGas++; currentLiquid--; }
-    }
-    while (currentLiquid < targetLiquid && currentGas > 0) {
-        const p = particles.find(p => p.isGas);
-        if (p) { p.isGas = false; p.resetPosition(); currentLiquid++; currentGas--; }
-    }
-}
-
-for (let i = 0; i < TOTAL_MOL * PARTICLE_RATIO; i++) {
-    particles.push(new Particle(i < state.gasMol * PARTICLE_RATIO));
-}
-
-function clampVolume() {
-    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
-    const minVol = liquidVolL + 0.5; // 気相のスペースを少し広めに確保
-    
-    UI.vol.min = minVol.toFixed(2);
-
-    if (state.containerVol < minVol) {
-        state.containerVol = minVol;
-        UI.vol.value = minVol;
-        UI.volDisp.textContent = `${state.containerVol.toFixed(1)} L`;
-    }
-}
-
-function calculatePhysics(dt) {
-    const pVapMmHg = Math.pow(10, currentSubstance.A - (currentSubstance.B / (currentSubstance.C + state.tempC)));
-    state.vaporPressurePa = pVapMmHg * 133.322;
-
-    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL; 
-    let gasVolL = state.containerVol - liquidVolL;
-    if (gasVolL < 0.1) gasVolL = 0.1;
-
-    let targetGasMol = (state.vaporPressurePa / 1000) * gasVolL / (R_kPa * state.tempK);
-    if (targetGasMol > TOTAL_MOL) targetGasMol = TOTAL_MOL;
-
-    const reactionRate = 2.0 * Math.exp(-1500 / state.tempK) * state.timeSpeed;
-    const diffMol = targetGasMol - state.gasMol;
-    
-    const deltaMol = diffMol * reactionRate * (dt * 60);
-    state.gasMol += deltaMol;
-    state.liquidMol = TOTAL_MOL - state.gasMol;
-
-    if (state.gasMol < 0) { state.gasMol = 0; state.liquidMol = TOTAL_MOL; }
-    if (state.liquidMol < 0) { state.liquidMol = 0; state.gasMol = TOTAL_MOL; }
-
-    state.currentPressurePa = (state.gasMol * R_kPa * state.tempK / gasVolL) * 1000;
-}
-
-function updateUI() {
-    UI.vapPresDisp.textContent = `${(state.vaporPressurePa / 100).toFixed(1)} hPa`;
-    UI.curPresDisp.textContent = `${(state.currentPressurePa / 100).toFixed(1)} hPa`;
-    UI.molDisp.textContent = `${state.gasMol.toFixed(1)} / ${state.liquidMol.toFixed(1)} mol`;
-
-    const diff = state.vaporPressurePa - state.currentPressurePa;
-    const threshold = state.vaporPressurePa * 0.02;
-
-    if (state.liquidMol < 0.1) {
-        UI.statusBadge.textContent = "GAS ONLY";
-        UI.statusBadge.className = "status-badge status-eq";
-    } else if (Math.abs(diff) < threshold) {
-        UI.statusBadge.textContent = "EQUILIBRIUM";
-        UI.statusBadge.className = "status-badge status-eq";
-    } else if (diff > 0) {
-        UI.statusBadge.textContent = "EVAPORATING ↑";
-        UI.statusBadge.className = "status-badge status-evap";
+  // click on note elements (delegation)
+  gridEl.addEventListener('click', e => {
+    const el = e.target.closest('.note, .hold');
+    if(!el) return;
+    const id = Number(el.dataset.id);
+    if(tool === 'erase'){
+      pushUndo(); removeNoteById(id); renderVisibleNotes(); refreshNoteList();
     } else {
-        UI.statusBadge.textContent = "CONDENSING ↓";
-        UI.statusBadge.className = "status-badge status-cond";
+      selectNote(id);
     }
+  });
+
+  // keyboard shortcuts
+  window.addEventListener('keydown', e => {
+    if(e.key === ' '){ e.preventDefault(); isPlaying ? stopPlayback() : startPlayback(); }
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undo(); }
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){ e.preventDefault(); redo(); }
+    if(e.key === 'e' || e.key === 'E'){ setTool(tool === 'erase' ? 'select' : 'erase'); }
+    if(e.key === 'Delete' || e.key === 'Backspace'){ if(selectedNoteId){ pushUndo(); removeNoteById(selectedNoteId); renderVisibleNotes(); refreshNoteList(); } }
+    if(e.key >= '1' && e.key <= '6'){ // quick add tap to lane
+      const lane = Number(e.key) - 1;
+      const centerBeat = getCenterVisibleBeat();
+      pushUndo();
+      addNoteData({lane, start: snapToGrid(centerBeat), length:1/subdiv, type:'tap'});
+      renderVisibleNotes(); refreshNoteList();
+    }
+    // arrow keys to nudge selected note
+    if(selectedNoteId){
+      const n = findNoteById(selectedNoteId);
+      if(!n) return;
+      if(e.key === 'ArrowLeft'){ e.preventDefault(); pushUndo(); n.start = Math.max(0, snapToGrid(n.start - (1/subdiv))); renderVisibleNotes(); refreshNoteList(); }
+      if(e.key === 'ArrowRight'){ e.preventDefault(); pushUndo(); n.start = snapToGrid(n.start + (1/subdiv)); renderVisibleNotes(); refreshNoteList(); }
+      if(e.key === 'ArrowUp'){ e.preventDefault(); pushUndo(); n.lane = Math.max(0, n.lane - 1); renderVisibleNotes(); refreshNoteList(); }
+      if(e.key === 'ArrowDown'){ e.preventDefault(); pushUndo(); n.lane = Math.min(LANES-1, n.lane + 1); renderVisibleNotes(); refreshNoteList(); }
+    }
+  });
 }
 
-function drawCanvas() {
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+/* helper: get beat at mouse position */
+function getGridPosition(e){
+  const rect = gridEl.getBoundingClientRect();
+  const x = (e.clientX - rect.left) + gridEl.scrollLeft;
+  const lane = Math.floor((e.clientX - rect.left + gridEl.scrollLeft) / LANE_WIDTH);
+  const beat = (x / SNAP_PX) / subdiv;
+  return {x, lane: Math.max(0, Math.min(LANES-1, lane)), beat};
+}
+function snapToGrid(beat){ const step = 1 / subdiv; return Math.round(beat / step) * step; }
 
-    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
-    const liquidH = CANVAS_H * (liquidVolL / MAX_VOL);
-    const liquidY = CANVAS_H - liquidH;
-    
-    const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
-
-    // 気体領域の背景
-    ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
-    ctx.fillRect(0, pistonBottom, CANVAS_W, liquidY - pistonBottom);
-
-    // 液体領域
-    const grad = ctx.createLinearGradient(0, liquidY, 0, CANVAS_H);
-    grad.addColorStop(0, currentSubstance.colorL.replace("0.8", "0.4"));
-    grad.addColorStop(1, currentSubstance.colorD.replace("0.9", "0.7"));
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, liquidY, CANVAS_W, liquidH);
-    
-    // 液面のハイライト（光らせる）
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = currentSubstance.colorL;
-    ctx.fillRect(0, liquidY, CANVAS_W, 2);
-    ctx.shadowBlur = 0;
-
-    // 【見栄え特化】パーティクルを加算合成モードで描画して光の重なりを表現
-    ctx.globalCompositeOperation = 'lighter';
-    particles.forEach(p => p.draw(ctx, currentSubstance.colorL));
-
-    // ピストン（加算合成の前に戻す）
-    ctx.globalCompositeOperation = 'source-over';
-    const pistonTop = pistonBottom - PISTON_H;
-    const pistonGrad = ctx.createLinearGradient(0, pistonTop, 0, pistonBottom);
-    pistonGrad.addColorStop(0, "#2a2a30");
-    pistonGrad.addColorStop(1, "#151518");
-    
-    ctx.fillStyle = pistonGrad;
-    ctx.beginPath();
-    ctx.roundRect(4, pistonTop, CANVAS_W - 8, PISTON_H, 8);
-    ctx.fill();
-
-    // シャフト
-    ctx.fillStyle = "#333";
-    ctx.fillRect(CANVAS_W/2 - 8, 0, 16, pistonTop);
+/* detect note at position (returns {note, el, id, type}) */
+function detectNoteAtPos(pos){
+  // check visible notes DOM for hit
+  const laneEl = gridEl.children[pos.lane];
+  if(!laneEl) return null;
+  const children = laneEl.querySelectorAll('.note,.hold');
+  for(const el of children){
+    const rect = el.getBoundingClientRect();
+    const gridRect = gridEl.getBoundingClientRect();
+    const x = pos.x - (gridRect.left - gridEl.scrollLeft);
+    const elLeft = el.offsetLeft;
+    const elRight = elLeft + el.offsetWidth;
+    const beatAtX = (x / SNAP_PX) / subdiv;
+    const id = Number(el.dataset.id);
+    const note = findNoteById(id);
+    if(!note) continue;
+    const start = note.start;
+    const end = note.start + note.length;
+    const tol = 1/subdiv/2;
+    if(beatAtX + tol >= start && beatAtX <= end - tol){
+      return {id, el, note, type: note.type};
+    }
+  }
+  return null;
 }
 
-let lastTime = performance.now();
-
-function loop(currentTime) {
-    const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
-    lastTime = currentTime;
-
-    clampVolume();
-    syncParticles();
-    calculatePhysics(dt);
-    
-    const liquidVolL = state.liquidMol * LIQUID_VOL_PER_MOL;
-    const liquidY = CANVAS_H - (CANVAS_H * (liquidVolL / MAX_VOL));
-    const pistonBottom = CANVAS_H - (CANVAS_H * (state.containerVol / MAX_VOL));
-    
-    particles.forEach(p => p.update(dt, pistonBottom, liquidY));
-
-    drawCanvas();
-    updateUI();
-
-    requestAnimationFrame(loop);
+/* get center visible beat for quick add */
+function getCenterVisibleBeat(){
+  const scrollLeft = timelineEl.scrollLeft;
+  const viewWidth = timelineEl.clientWidth;
+  const centerX = scrollLeft + viewWidth / 2;
+  return (centerX / SNAP_PX) / subdiv;
 }
 
-UI.substance.addEventListener('change', (e) => {
-    currentSubstance = SUBSTANCES[e.target.value];
-});
+/* ====== Undo / Redo ====== */
+function pushUndo(){
+  undoStack.push(JSON.stringify({notes, tempoEvents, timeSigEvents}));
+  if(undoStack.length > 200) undoStack.shift();
+  redoStack = [];
+}
+function undo(){
+  if(undoStack.length === 0) return;
+  const state = undoStack.pop();
+  redoStack.push(JSON.stringify({notes, tempoEvents, timeSigEvents}));
+  const obj = JSON.parse(state);
+  notes = obj.notes || [];
+  tempoEvents = obj.tempoEvents || tempoEvents;
+  timeSigEvents = obj.timeSigEvents || timeSigEvents;
+  selectedNoteId = null;
+  renderVisibleNotes(); rebuildTempoList(); rebuildTimeSigList(); refreshNoteList();
+}
+function redo(){
+  if(redoStack.length === 0) return;
+  const state = redoStack.pop();
+  undoStack.push(JSON.stringify({notes, tempoEvents, timeSigEvents}));
+  const obj = JSON.parse(state);
+  notes = obj.notes || [];
+  tempoEvents = obj.tempoEvents || tempoEvents;
+  timeSigEvents = obj.timeSigEvents || timeSigEvents;
+  selectedNoteId = null;
+  renderVisibleNotes(); rebuildTempoList(); rebuildTimeSigList(); refreshNoteList();
+}
 
-UI.temp.addEventListener('input', (e) => {
-    state.tempC = parseFloat(e.target.value);
-    state.tempK = state.tempC + 273.15;
-    UI.tempDisp.textContent = `${state.tempC} °C`;
-});
+/* ====== Tempo / TimeSig イベント管理 ====== */
+function addTempoEvent(ev){
+  tempoEvents.push({beat:ev.beat, bpm:ev.bpm});
+  tempoEvents.sort((a,b)=>a.beat-b.beat);
+  rebuildTempoList();
+  pushUndo();
+}
+function removeTempoEvent(index){
+  if(index === 0) return; // keep initial
+  tempoEvents.splice(index,1);
+  rebuildTempoList();
+  pushUndo();
+}
+function rebuildTempoList(){
+  const el = document.getElementById('tempoList');
+  el.innerHTML = '';
+  tempoEvents.forEach((t,i) => {
+    const row = document.createElement('div');
+    row.className = 'event-item';
+    row.innerHTML = `<div>Beat ${t.beat} → ${t.bpm} BPM</div><div><button data-i="${i}" class="secondary">削除</button></div>`;
+    el.appendChild(row);
+    row.querySelector('button').addEventListener('click', () => { removeTempoEvent(i); });
+  });
+}
 
-UI.vol.addEventListener('input', (e) => {
-    state.containerVol = parseFloat(e.target.value);
-    UI.volDisp.textContent = `${state.containerVol.toFixed(1)} L`;
-});
+function addTimeSigEvent(ev){
+  timeSigEvents.push({beat:ev.beat, beatsPerMeasure:ev.beatsPerMeasure, beatUnit:ev.beatUnit});
+  timeSigEvents.sort((a,b)=>a.beat-b.beat);
+  rebuildTimeSigList();
+  pushUndo();
+}
+function removeTimeSigEvent(index){
+  if(index === 0) return;
+  timeSigEvents.splice(index,1);
+  rebuildTimeSigList();
+  pushUndo();
+}
+function rebuildTimeSigList(){
+  const el = document.getElementById('timeSigList');
+  el.innerHTML = '';
+  timeSigEvents.forEach((t,i) => {
+    const row = document.createElement('div');
+    row.className = 'event-item';
+    row.innerHTML = `<div>Beat ${t.beat} → ${t.beatsPerMeasure}/${t.beatUnit}</div><div><button data-i="${i}" class="secondary">削除</button></div>`;
+    el.appendChild(row);
+    row.querySelector('button').addEventListener('click', () => { removeTimeSigEvent(i); });
+  });
+}
 
-UI.speed.addEventListener('input', (e) => {
-    state.timeSpeed = parseFloat(e.target.value);
-    UI.speedDisp.textContent = `${state.timeSpeed.toFixed(1)}x`;
-});
+/* ====== 再生: テンポマップ対応 ====== */
+/* Precompute tempo segments: [{startBeat, bpm, startSec}] */
+function buildTempoMap(){
+  const map = [];
+  tempoEvents.sort((a,b)=>a.beat-b.beat);
+  let accSec = 0;
+  for(let i=0;i<tempoEvents.length;i++){
+    const cur = tempoEvents[i];
+    const next = tempoEvents[i+1];
+    map.push({startBeat:cur.beat, bpm:cur.bpm, startSec:accSec});
+    if(next){
+      const beatsSpan = next.beat - cur.beat;
+      accSec += beatsSpan * (60 / cur.bpm);
+    }
+  }
+  // add a final sentinel (no next)
+  return map;
+}
 
-requestAnimationFrame(loop);
+/* beat -> seconds using tempo map */
+function beatToSeconds(beat, tempoMap){
+  // find segment
+  let seg = tempoMap[tempoMap.length-1];
+  for(let i=0;i<tempoMap.length;i++){
+    if(i+1 < tempoMap.length && beat >= tempoMap[i+1].startBeat) continue;
+    seg = tempoMap[i];
+    break;
+  }
+  const dtBeats = beat - seg.startBeat;
+  return seg.startSec + dtBeats * (60 / seg.bpm);
+}
+
+/* seconds -> beat (inverse) */
+function secondsToBeat(sec, tempoMap){
+  // find segment where startSec <= sec < next.startSec
+  let segIndex = tempoMap.length - 1;
+  for(let i=0;i<tempoMap.length;i++){
+    const next = tempoMap[i+1];
+    if(next && sec >= next.startSec) continue;
+    segIndex = i;
+    break;
+  }
+  const seg = tempoMap[segIndex];
+  const dtSec = sec - seg.startSec;
+  return seg.startBeat + dtSec / (60 / seg.bpm);
+}
+
+/* playback */
+function startPlayback(){
+  if(isPlaying) return;
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx.resume().then(() => {
+    isPlaying = true;
+    playStartTime = audioCtx.currentTime;
+    playStartBeat = 0;
+    document.getElementById('play').disabled = true;
+    document.getElementById('stop').disabled = false;
+    // reset played flags
+    notes.forEach(n => n._played = false);
+    rafLoop();
+    playIntervalId = setInterval(playbackTick, 40);
+  });
+}
+function stopPlayback(){
+  if(!isPlaying) return;
+  isPlaying = false;
+  if(rafId) cancelAnimationFrame(rafId);
+  if(playIntervalId) clearInterval(playIntervalId);
+  document.getElementById('play').disabled = false;
+  document.getElementById('stop').disabled = true;
+  playheadEl.style.left = '0px';
+  document.getElementById('timeLabel').textContent = '0:00.000';
+  notes.forEach(n => n._played = false);
+}
+
+function rafLoop(){
+  if(!isPlaying) return;
+  const now = audioCtx.currentTime;
+  const elapsed = now - playStartTime;
+  const tempoMap = buildTempoMap();
+  const currentBeat = secondsToBeat(elapsed + beatToSeconds(playStartBeat, tempoMap), tempoMap);
+  updatePlayheadByBeat(currentBeat);
+  rafId = requestAnimationFrame(rafLoop);
+}
+
+function updatePlayheadByBeat(beat){
+  const colWidth = SNAP_PX;
+  const leftPx = beat * subdiv * colWidth;
+  playheadEl.style.left = leftPx + 'px';
+  // update time label
+  const tempoMap = buildTempoMap();
+  const sec = beatToSeconds(beat, tempoMap);
+  document.getElementById('timeLabel').textContent = formatTime(sec);
+}
+
+function playbackTick(){
+  if(!isPlaying) return;
+  const now = audioCtx.currentTime;
+  const elapsed = now - playStartTime;
+  const tempoMap = buildTempoMap();
+  const beatNow = secondsToBeat(elapsed + beatToSeconds(playStartBeat, tempoMap), tempoMap);
+  const lookaheadSec = 0.12;
+  const lookaheadBeat = lookaheadSec / (60 / tempoMap[0].bpm); // approximate small
+  for(const n of notes){
+    if(n._played) continue;
+    const noteSec = beatToSeconds(n.start, tempoMap);
+    const rel = noteSec - (elapsed + beatToSeconds(playStartBeat, tempoMap));
+    if(rel >= 0 && rel < lookaheadSec){
+      playNoteSound(n.lane, 0.12);
+      n._played = true;
+    }
+  }
+  // metronome tick
+  if(typeof playbackTick._lastBeat === 'undefined') playbackTick._lastBeat = -1;
+  const beatIndex = Math.floor(beatNow);
+  if(beatIndex !== playbackTick._lastBeat){
+    const isMeasureStart = isMeasureStartAtBeat(beatIndex);
+    playClick(isMeasureStart ? 1.0 : 0.6);
+    playbackTick._lastBeat = beatIndex;
+  }
+}
+
+/* helper: is measure start at beat (consider timeSigEvents) */
+function isMeasureStartAtBeat(beat){
+  // find current time signature
+  let ts = timeSigEvents[0];
+  for(const t of timeSigEvents){
+    if(t.beat <= beat) ts = t;
+    else break;
+  }
+  return ((Math.floor(beat) - ts.beat) % ts.beatsPerMeasure) === 0;
+}
+
+/* audio helpers */
+function playClick(volume=0.6){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'square';
+  o.frequency.value = 1000;
+  g.gain.value = volume * 0.05;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + 0.06);
+}
+function playNoteSound(lane, dur=0.12){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  const base = 220;
+  o.frequency.value = base * Math.pow(1.06, lane);
+  g.gain.value = 0.08;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + dur);
+}
+
+/* ====== JSON 入出力 ====== */
+function exportJSON(){
+  const data = {
+    meta:{subdiv, measures},
+    tempoEvents, timeSigEvents,
+    notes
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'chart.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importJSON(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(data.meta){
+        subdiv = data.meta.subdiv || subdiv;
+        measures = data.meta.measures || measures;
+        document.getElementById('subdiv').value = subdiv;
+      }
+      if(Array.isArray(data.tempoEvents)) tempoEvents = data.tempoEvents.slice();
+      if(Array.isArray(data.timeSigEvents)) timeSigEvents = data.timeSigEvents.slice();
+      if(Array.isArray(data.notes)) notes = data.notes.map(n => Object.assign({}, n));
+      // ensure nextId
+      const maxId = notes.reduce((m,x)=>Math.max(m, x.id||0), 0);
+      nextId = Math.max(nextId, maxId + 1);
+      rebuildTempoList(); rebuildTimeSigList(); rebuildGrid(); refreshNoteList(); pushUndo();
+    }catch(err){
+      alert('読み込みエラー: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+/* ====== UI 更新: ノーツ一覧 ====== */
+function refreshNoteList(){
+  const el = document.getElementById('noteList');
+  el.innerHTML = '';
+  if(notes.length === 0){ el.innerHTML = '<div class="small muted">ノーツがありません</div>'; return; }
+  const sorted = notes.slice().sort((a,b)=> a.start - b.start || a.lane - b.lane);
+  for(const n of sorted){
+    const row = document.createElement('div');
+    row.className = 'note-item';
+    const left = document.createElement('div');
+    left.innerHTML = `<strong>${n.type === 'tap' ? 'Tap' : 'Hold'}</strong> L${n.lane+1} @ ${n.start.toFixed(3)}b`;
+    const right = document.createElement('div');
+    right.innerHTML = `<span class="small muted">${n.type==='hold' ? n.length.toFixed(3)+'b' : ''}</span> <button data-id="${n.id}" class="secondary">削除</button>`;
+    row.appendChild(left); row.appendChild(right);
+    el.appendChild(row);
+    right.querySelector('button').addEventListener('click', () => { pushUndo(); removeNoteById(n.id); renderVisibleNotes(); refreshNoteList(); });
+    row.addEventListener('click', () => selectNote(n.id));
+  }
+}
+
+/* ====== ユーティリティ ====== */
+function setTool(t){
+  tool = t;
+  document.getElementById('toolLabel').textContent = t === 'tap' ? 'タップ' : t === 'hold' ? 'ホールド' : t === 'erase' ? '消しゴム' : '選択';
+  // update aria-pressed
+  document.getElementById('toolTap').setAttribute('aria-pressed', t==='tap');
+  document.getElementById('toolHold').setAttribute('aria-pressed', t==='hold');
+  document.getElementById('eraseMode').setAttribute('aria-pressed', t==='erase');
+}
+function formatTime(t){
+  const m = Math.floor(t/60);
+  const s = Math.floor(t%60).toString().padStart(2,'0');
+  const ms = Math.floor((t - Math.floor(t)) * 1000).toString().padStart(3,'0');
+  return `${m}:${s}.${ms}`;
+}
+
+/* ====== 最終レンダリング同期 ====== */
+function renderAll(){
+  rebuildGrid();
+  renderVisibleNotes();
+  refreshNoteList();
+  rebuildTempoList();
+  rebuildTimeSigList();
+}
+
+/* expose some helpers for debugging (optional) */
+window._editor = {notes, tempoEvents, timeSigEvents, renderAll, addNoteData, removeNoteById};
 
 </script>
 </body>
